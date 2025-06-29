@@ -1,68 +1,68 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import IconButton from '@mui/material/IconButton';
+import {
+  IconButton, Menu, MenuItem, Accordion, AccordionSummary, AccordionDetails, Typography
+} from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import Typography from '@mui/material/Typography';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { useNavigate } from 'react-router-dom';
 
-interface MobileMenuProps {
-  anchorElNav: HTMLElement | null;
-  handleOpenNavMenu: (event: React.MouseEvent<HTMLElement>) => void;
-  handleCloseNavMenu: () => void;
-  pages: { name: string; link: string }[];
-  selectedPage: string; // Add selectedPage prop
-  onMenuItemClick: (pageName: string) => void; // Add click handler prop
+export default function MobileMenu({
+  anchorElNav,
+  handleOpenNavMenu,
+  handleCloseNavMenu,
+  pages,
+  selectedPage,
+  onMenuItemClick
+}: any) {
+  const navigate = useNavigate();
+
+  return (
+    <>
+      <IconButton size="large" onClick={handleOpenNavMenu} color="inherit">
+        <MenuIcon />
+      </IconButton>
+      <Menu
+        anchorEl={anchorElNav}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        keepMounted
+        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+        open={Boolean(anchorElNav)}
+        onClose={handleCloseNavMenu}
+      >
+        {pages.map((page: any) =>
+          page.children ? (
+            <Accordion key={page.name} sx={{ boxShadow: 'none' }}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography>{page.name}</Typography>
+              </AccordionSummary>
+              <AccordionDetails sx={{ pl: 2 }}>
+                {page.children.map((child: any) => (
+                  <MenuItem
+                    key={child.name}
+                    onClick={() => {
+                      onMenuItemClick(page.name);
+                      navigate(child.link);
+                      handleCloseNavMenu();
+                    }}
+                  >
+                    {child.name}
+                  </MenuItem>
+                ))}
+              </AccordionDetails>
+            </Accordion>
+          ) : (
+            <MenuItem
+              key={page.name}
+              onClick={() => {
+                onMenuItemClick(page.name);
+                navigate(page.link);
+                handleCloseNavMenu();
+              }}
+            >
+              {page.name}
+            </MenuItem>
+          )
+        )}
+      </Menu>
+    </>
+  );
 }
-
-const MobileMenu: React.FC<MobileMenuProps> = ({ anchorElNav, handleOpenNavMenu, handleCloseNavMenu, pages, selectedPage, onMenuItemClick }) => (
-  <div>
-    <IconButton
-      size="large"
-      aria-label="account of current user"
-      aria-controls="menu-appbar"
-      aria-haspopup="true"
-      onClick={handleOpenNavMenu}
-      color="inherit"
-    >
-      <MenuIcon />
-    </IconButton>
-    <Menu
-      id="menu-appbar"
-      anchorEl={anchorElNav}
-      anchorOrigin={{
-        vertical: 'bottom',
-        horizontal: 'left',
-      }}
-      keepMounted
-      transformOrigin={{
-        vertical: 'top',
-        horizontal: 'left',
-      }}
-      open={Boolean(anchorElNav)}
-      onClose={handleCloseNavMenu}
-      sx={{
-        display: { xs: 'block', md: 'none' },
-      }}
-    >
-      {pages.map((page) => (
-        <MenuItem
-          key={page.name}
-          component={Link}
-          to={page.link}
-          onClick={() => {
-            onMenuItemClick(page.name);
-            handleCloseNavMenu();
-          }}
-          sx={{
-            backgroundColor: selectedPage === page.name ? 'primary.light' : 'inherit',
-          }}
-        >
-          <Typography textAlign="center">{page.name}</Typography>
-        </MenuItem>
-      ))}
-    </Menu>
-  </div>
-);
-
-export default MobileMenu;

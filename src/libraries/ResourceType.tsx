@@ -1,14 +1,15 @@
 import {
     PostData, DeleteData, GetData, BuildUrl
  } from './Utils';
-import {
-    API_PATHS, API_BASE_URL
-} from './Paths';
+ import { getApiBaseUrl, API_PATHS } from './Paths';
 
-const RESOURCE_TYPE_API_BASE_URL = BuildUrl(API_BASE_URL, API_PATHS["resourceType"]);
+
+function getResourceTypeUrl(): string {
+  return BuildUrl(getApiBaseUrl(), API_PATHS["resourceType"]);
+}
 
 export async function CreateResourceType(data: Record<string, any>): Promise<any> {
-  return PostData(RESOURCE_TYPE_API_BASE_URL, data);
+  return PostData(getResourceTypeUrl(), data);
 }
 
 export async function ListResourceTypes(pageNumber: number, itemsPerPage: number): Promise<any> {
@@ -17,17 +18,17 @@ export async function ListResourceTypes(pageNumber: number, itemsPerPage: number
       items_per_page: itemsPerPage.toString()
     };
   
-    const endpoints = await GetData(RESOURCE_TYPE_API_BASE_URL, queryParams);
+    const endpoints = await GetData(getResourceTypeUrl(), queryParams);
     
     return endpoints.map((endpoint: any) => createResourceTypeData(endpoint));
   }
 
 export async function DeleteResourceType(id: string): Promise<void> {
-  await DeleteData(`${RESOURCE_TYPE_API_BASE_URL}/${id}`);
+  await DeleteData(`${getResourceTypeUrl()}/${id}`);
 }
 
 export async function CreateResourceTypeInBulk(data: Array<Record<string, any>>): Promise<any> {
-  const url = `${RESOURCE_TYPE_API_BASE_URL}/batch`;
+  const url = `${getResourceTypeUrl()}/batch`;
   return PostData(url, data, { 'Content-Type': 'application/json' }, false);
 }
 

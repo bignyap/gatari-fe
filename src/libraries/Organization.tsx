@@ -1,14 +1,14 @@
 import {
     PostData, DeleteData, GetData, BuildUrl
  } from './Utils';
-import {
-    API_PATHS, API_BASE_URL
-} from './Paths';
+ import { getApiBaseUrl, API_PATHS } from './Paths';
 
-const ORGANIZATION_API_BASE_URL = BuildUrl(API_BASE_URL, API_PATHS["organization"]);
+function getOrganizationUrl(): string {
+  return BuildUrl(getApiBaseUrl(), API_PATHS["organization"]);
+}
 
 export async function CreateOrganization(data: Record<string, any>): Promise<any> {
-  return PostData(ORGANIZATION_API_BASE_URL, data);
+  return PostData(getOrganizationUrl(), data);
 }
 
 export async function ListOrganizations(pageNumber: number, itemsPerPage: number): Promise<any> {
@@ -17,7 +17,7 @@ export async function ListOrganizations(pageNumber: number, itemsPerPage: number
       items_per_page: itemsPerPage.toString()
     };
   
-    let organizations = await GetData(ORGANIZATION_API_BASE_URL, queryParams);
+    let organizations = await GetData(getOrganizationUrl(), queryParams);
 
     if (organizations["total_items"] > 0) {
       organizations["data"] = organizations["data"].map((org: any) => createOrganizationData(org));
@@ -27,16 +27,16 @@ export async function ListOrganizations(pageNumber: number, itemsPerPage: number
   }
 
 export async function GetOrganizationById(id: number): Promise<any> {
-  const val = await GetData(`${ORGANIZATION_API_BASE_URL}/${id}`)
+  const val = await GetData(`${getOrganizationUrl()}/${id}`)
   return createOrganizationData(val);
 }
 
 export async function DeleteOrganization(id: number): Promise<void> {
-  await DeleteData(`${ORGANIZATION_API_BASE_URL}/${id}`);
+  await DeleteData(`${getOrganizationUrl()}/${id}`);
 }
 
 export async function CreateOrganizationInBulk(data: Array<Record<string, any>>): Promise<any> {
-  const url = `${ORGANIZATION_API_BASE_URL}/batch`;
+  const url = `${getOrganizationUrl()}/batch`;
   return PostData(url, data, { 'Content-Type': 'application/json' }, false);
 }
 

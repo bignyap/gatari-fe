@@ -1,14 +1,14 @@
 import {
     PostData, DeleteData, GetData, BuildUrl
  } from './Utils';
-import {
-    API_PATHS, API_BASE_URL
-} from './Paths';
+ import { getApiBaseUrl, API_PATHS } from './Paths';
 
-const TIER_PRICING_API_BASE_URL = BuildUrl(API_BASE_URL, API_PATHS["tierPricing"]);
+function gettierPricingUrl(): string {
+  return BuildUrl(getApiBaseUrl(), API_PATHS["tierPricing"]);
+}
 
 export async function CreateTierPricing(data: Record<string, any>): Promise<any> {
-  return PostData(TIER_PRICING_API_BASE_URL, data);
+  return PostData(gettierPricingUrl(), data);
 }
 
 export async function GetTierPricingBySubTierId(tierId: number, pageNumber: number, itemsPerPage: number): Promise<any> {
@@ -17,7 +17,7 @@ export async function GetTierPricingBySubTierId(tierId: number, pageNumber: numb
       items_per_page: itemsPerPage.toString(),
     };
 
-    const finalUrl = BuildUrl(TIER_PRICING_API_BASE_URL, tierId.toString())
+    const finalUrl = BuildUrl(gettierPricingUrl(), tierId.toString())
   
     let tierPricing = await GetData(finalUrl, queryParams);
 
@@ -29,15 +29,15 @@ export async function GetTierPricingBySubTierId(tierId: number, pageNumber: numb
   }
 
 export async function DeleteTierPricing(id: number): Promise<void> {
-  await DeleteData(`${TIER_PRICING_API_BASE_URL}/${id}`);
+  await DeleteData(`${gettierPricingUrl()}/${id}`);
 }
 
 export async function DeleteTierPricingBySubId(id: number): Promise<void> {
-    await DeleteData(`${TIER_PRICING_API_BASE_URL}/tierId/${id}`);
+    await DeleteData(`${gettierPricingUrl()}/tierId/${id}`);
   }
 
 export async function CreateTierPricingInBulk(data: Array<Record<string, any>>): Promise<any> {
-  const url = `${TIER_PRICING_API_BASE_URL}/batch`;
+  const url = `${gettierPricingUrl()}/batch`;
   return PostData(url, data, { 'Content-Type': 'application/json' }, false);
 }
 

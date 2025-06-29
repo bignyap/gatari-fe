@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { 
-  Box, TextField, Button, 
+  Box, TextField, 
   MenuItem, FormControl, 
   Select, InputLabel, 
   Tabs, Tab 
@@ -9,7 +9,7 @@ import OrganizationTypeSelect from './OrganizationTypeSelect';
 import ConfigEditor from './ConfigEditor';
 import { CustomizedSnackbars } from '../../components/Common/Toast';
 import Grid from '@mui/material/Grid2';
-import { Cancel, Save } from '@mui/icons-material';
+import CommonButton from '../../components/Common/Button';
 
 interface OrganizationFormProps {
   initialData: any;
@@ -18,6 +18,7 @@ interface OrganizationFormProps {
   columns?: number;
   buttonAtTop?: boolean;
   includeConfig?: boolean;
+  disabled?: boolean;
 }
 
 function GridComponentInEdit({ value, size }: { value: React.ReactNode, size: { xs: number, sm: number } }) {
@@ -32,10 +33,10 @@ const OrganizationForm: React.FC<OrganizationFormProps> = (
   { 
     initialData, onSubmit, onCancel, 
     columns = 2, buttonAtTop = false, 
-    includeConfig = true 
+    includeConfig = true,
+    disabled = false,
   }
 ) => {
-  
   const [formData, setFormData] = useState(initialData);
   const [snackbar, setSnackbar] = useState<{ message: string; status: string } | null>(null);
   const [activeTab, setActiveTab] = useState(0);
@@ -53,8 +54,6 @@ const OrganizationForm: React.FC<OrganizationFormProps> = (
     });
   };
 
-  console.log(formData);
-
   const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     onSubmit(formData);
@@ -64,7 +63,6 @@ const OrganizationForm: React.FC<OrganizationFormProps> = (
 
   return (
     <>
-      {/* Snackbar */}
       {snackbar && (
         <CustomizedSnackbars
           message={snackbar.message}
@@ -74,43 +72,13 @@ const OrganizationForm: React.FC<OrganizationFormProps> = (
         />
       )}
 
-      {/* Top Buttons */}
-      {buttonAtTop && <Box 
-          display="flex" 
-          justifyContent="flex-end" 
-          alignItems="center" 
-          mb={2} 
-          position="relative" 
-          top={8} 
-          right={8}
-      >
-         <Box mr={2}>
-            <Button
-                variant="contained"
-                startIcon={<Save />}
-                color="primary"
-                onClick={handleSubmit}
-            >
-                Save
-            </Button>
-          </Box>
-          <Button
-              variant="outlined"
-              startIcon={<Cancel />}
-              onClick={onCancel}
-          >
-              Cancel
-          </Button>
-          
-      </Box>}
+      {includeConfig && (
+        <Tabs value={activeTab} onChange={handleTabChange} aria-label="organization form tabs">
+           <Tab label="Info" />
+           <Tab label="Configuration" />
+        </Tabs>
+      )}
 
-       {/* Tabs */}
-      <Tabs value={activeTab} onChange={handleTabChange} aria-label="organization form tabs">
-        <Tab label="INFO" />
-        {includeConfig && <Tab label="Configuration" />}
-      </Tabs>
-
-      {/* Tab Panels */}
       {activeTab === 0 && (
         <Grid 
           container 
@@ -133,6 +101,7 @@ const OrganizationForm: React.FC<OrganizationFormProps> = (
               value={formData.name}
               onChange={handleChange}
               required
+              disabled={disabled}
             />
           } size={gridSize} />
           <GridComponentInEdit value={
@@ -144,12 +113,14 @@ const OrganizationForm: React.FC<OrganizationFormProps> = (
               value={formData.realm}
               onChange={handleChange}
               required
+              disabled={disabled}
             />
           } size={gridSize} />
           <GridComponentInEdit value={
             <OrganizationTypeSelect
               value={formData.type_id}
               onChange={(e) => setFormData({ ...formData, type_id: Number(e.target.value) })}
+              disabled={disabled}
             />
           } size={gridSize} />
           <GridComponentInEdit value={
@@ -160,6 +131,7 @@ const OrganizationForm: React.FC<OrganizationFormProps> = (
               label="Country"
               value={formData.country}
               onChange={handleChange}
+              disabled={disabled}
             />
           } size={gridSize} />
           <GridComponentInEdit value={
@@ -171,40 +143,35 @@ const OrganizationForm: React.FC<OrganizationFormProps> = (
               value={formData.support_email}
               onChange={handleChange}
               required
+              disabled={disabled}
             />
           } size={gridSize} />
           <GridComponentInEdit value={
-            <FormControl 
-                fullWidth
-                margin="normal"
-            >
-                <InputLabel>Status</InputLabel>
-                <Select
-                    name="active"
-                    value={formData.active ? 'true' : 'false'}
-                    onChange={(e) => setFormData({ ...formData, active: e.target.value === 'true' })}
-                    label="Active"
-                >
-                    <MenuItem value="true">Active</MenuItem>
-                    <MenuItem value="false">Inactive</MenuItem>
-                </Select>
+            <FormControl fullWidth margin="normal" disabled={disabled}>
+              <InputLabel>Status</InputLabel>
+              <Select
+                name="active"
+                value={formData.active ? 'true' : 'false'}
+                onChange={(e) => setFormData({ ...formData, active: e.target.value === 'true' })}
+                label="Active"
+              >
+                <MenuItem value="true">Active</MenuItem>
+                <MenuItem value="false">Inactive</MenuItem>
+              </Select>
             </FormControl>
           } size={gridSize} />
           <GridComponentInEdit value={
-            <FormControl 
-                fullWidth
-                margin="normal"
-            >
-                <InputLabel>Reporting</InputLabel>
-                <Select
-                    name="report_q"
-                    value={formData.report_q ? 'true' : 'false'}
-                    onChange={(e) => setFormData({ ...formData, report_q: e.target.value === 'true' })}
-                    label="Reporting"
-                >
-                    <MenuItem value="true">True</MenuItem>
-                    <MenuItem value="false">False</MenuItem>
-                </Select>
+            <FormControl fullWidth margin="normal" disabled={disabled}>
+              <InputLabel>Reporting</InputLabel>
+              <Select
+                name="report_q"
+                value={formData.report_q ? 'true' : 'false'}
+                onChange={(e) => setFormData({ ...formData, report_q: e.target.value === 'true' })}
+                label="Reporting"
+              >
+                <MenuItem value="true">True</MenuItem>
+                <MenuItem value="false">False</MenuItem>
+              </Select>
             </FormControl>
           } size={gridSize} />
         </Grid>
@@ -216,13 +183,7 @@ const OrganizationForm: React.FC<OrganizationFormProps> = (
           spacing={2} 
           justifyContent="flex-start" 
           alignItems="flex-start" 
-          sx={{ 
-            mb:2, 
-            minHeight: '270px', 
-            maxHeight: '300px', 
-            minWidth: '800px',
-            overflowY: 'auto'
-          }}
+          sx={{ mb: 2, minHeight: '270px', maxHeight: '300px', minWidth: '800px', overflowY: 'auto' }}
         >
           <GridComponentInEdit value={
             <ConfigEditor
@@ -230,20 +191,30 @@ const OrganizationForm: React.FC<OrganizationFormProps> = (
               onConfigChange={(newConfig) => setFormData({ ...formData, config: newConfig })}
               editorMode={false}
               alwaysEditMode={includeConfig}
+              disabled={disabled}
             />
           } size={{ xs: 12, sm: 12 }} />
         </Grid>
       )}
 
-      {/* Bottom Buttons */}
-      {!buttonAtTop && <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2, ml: 'auto' }}>
-        <Button type="submit" variant="contained" color="primary" sx={{ mr: 1 }} onClick={handleSubmit}>
-          CREATE
-        </Button>
-        <Button type="button" onClick={onCancel} variant="outlined" color="secondary">
-          Cancel
-        </Button>
-      </Box>}
+      {!buttonAtTop && !disabled && (
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2, ml: 'auto' }}>
+          <CommonButton
+            label="Create"
+            type="submit"
+            variant="contained"
+            sx={{ mr: 1 }}
+            onClick={handleSubmit}
+          />
+
+          <CommonButton
+            label="Cancel"
+            type="button"
+            variant="outlined"
+            onClick={onCancel}
+          />
+        </Box>
+      )}
     </>
   );
 };

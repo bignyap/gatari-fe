@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { ListOrganizationTypes } from '../../../libraries/OrgType';
+import { ListOrganizationTypes } from '../../libraries/OrgType';
 import CircularProgress from '@mui/material/CircularProgress';
-import { EnhancedTable } from '../../../components/Table/Table'
-import { HeadCell } from '../../../components/Table/Utils';
-import Button from '@mui/material/Button'
+import { EnhancedTable } from '../../components/Table/Table'
+import { HeadCell } from '../../components/Table/Utils';
 import AddIcon from '@mui/icons-material/Add';
-import { CustomizedSnackbars } from '../../../components/Common/Toast';
+import { CustomizedSnackbars } from '../../components/Common/Toast';
+import CommonButton from "../../components/Common/Button";
 import OrgTypeModal from './OrgTypeModal';
 
 export function OrganizationTypeTab() {
@@ -81,16 +81,15 @@ export function OrganizationTypeLoader() {
             overflowY: 'auto'
           }}
           title={
-            <Button
+            <CommonButton
+              label="CREATE ORGANIZATION TYPE"
               component="label"
               role={undefined}
               variant="contained"
               tabIndex={-1}
               startIcon={<AddIcon />}
               onClick={handleCreateOrgType}
-            >
-              CREATE ORGANIZATION TYPE
-            </Button>
+            />
           }
           page={0}
           count={-1}

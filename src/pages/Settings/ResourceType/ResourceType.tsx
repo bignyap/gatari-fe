@@ -3,10 +3,13 @@ import { ListResourceTypes } from '../../../libraries/ResourceType';
 import CircularProgress from '@mui/material/CircularProgress';
 import { EnhancedTable } from '../../../components/Table/Table'
 import { HeadCell } from '../../../components/Table/Utils';
-import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add';
 import { CustomizedSnackbars } from '../../../components/Common/Toast';
 import ResourceTypeModal from './ResourceTypeModal';
+import CommonButton from '../../../components/Common/Button';
+import { Box } from '@mui/material';
+import { TextField, InputAdornment }  from '@mui/material'; 
+import SearchIcon from '@mui/icons-material/Search';
 
 export function ResourceTypeTab() {
     return (
@@ -80,16 +83,31 @@ export function ResourceTypeLoader() {
             overflowY: 'auto'
           }}
           title={
-            <Button
-              component="label"
-              role={undefined}
-              variant="contained"
-              tabIndex={-1}
-              startIcon={<AddIcon />}
-              onClick={handleCreateResourceType}
-            >
-              CREATE RESOURCE
-            </Button>
+            <Box sx={{ display: 'flex', gap: '10px', justifyContent: 'space-between', alignItems: 'center' }}>
+              <TextField
+                variant="outlined"
+                placeholder="Search..."
+                size="small"
+                style={{ width: '400px' }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
+                // Add onChange handler if needed
+              />
+              <CommonButton
+                label='CREATE RESOURCE'
+                component="label"
+                role={undefined}
+                variant="contained"
+                tabIndex={-1}
+                startIcon={<AddIcon />}
+                onClick={handleCreateResourceType}
+              />
+            </Box>
           }
           page={0}
           count={-1}

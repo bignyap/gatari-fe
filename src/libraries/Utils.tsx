@@ -1,12 +1,3 @@
-// import UserService from '../services/UserService';
-
-// import config from "../config"
-
-// function getChatServicePaths (pathName: string): string {
-//   return config.chatServiceUrl + api_paths["chatService"][pathName]
-// }
-
-
 export function BuildUrl(base: string, ...paths: string[]): string {
   const sanitizedBase = base.replace(/\/+$/, '');
   const sanitizedPaths = paths.map(path => path.replace(/^\/+/, ''));

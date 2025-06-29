@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import SubscriptionModal from './SubscriptionModal';
 import { EnhancedTable } from '../../components/Table/Table'
 import { HeadCell } from '../../components/Table/Utils';
-import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add';
 import { CustomizedSnackbars } from '../../components/Common/Toast';
 import CircularProgress from '@mui/material/CircularProgress';
 import { ListSubscriptionByOrgIds, ListSubscriptions } from '../../libraries/Subscription';
+import CommonButton from '../../components/Common/Button';
+import { TextField, InputAdornment }  from '@mui/material'; 
+import SearchIcon from '@mui/icons-material/Search';
 
 interface SubscriptionProps {
   orgId: number | null;
@@ -122,16 +124,33 @@ export function SubscriptionLoader({ orgId, tableContainerSx, subInitName = '' }
           }
         }}
         title={
-          <Button
-            component="label"
-            role={undefined}
-            variant="contained"
-            tabIndex={-1}
-            startIcon={<AddIcon />}
-            onClick={handleCreateSubscription}
-          >
-            CREATE SUBSCRIPTION
-          </Button>
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'space-between', alignItems: 'center' }}>
+            <TextField
+              variant="outlined"
+              placeholder="Search..."
+              size="small"
+              style={{ width: '400px' }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+              // Add onChange handler if needed
+            />
+            <div style={{ display: 'flex', gap: '10px' }}>
+            <CommonButton
+              label='CREATE SUBSCRIPTION'
+              component="label"
+              role={undefined}
+              variant="contained"
+              tabIndex={-1}
+              startIcon={<AddIcon />}
+              onClick={handleCreateSubscription}
+            />
+            </div>
+          </div>
         }
       />
       {isModalOpen && (

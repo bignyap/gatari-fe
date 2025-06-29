@@ -3,10 +3,13 @@ import { ListEndpoints } from '../../../libraries/Endpoint';
 import CircularProgress from '@mui/material/CircularProgress';
 import { EnhancedTable } from '../../../components/Table/Table'
 import { HeadCell } from '../../../components/Table/Utils';
-import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add';
 import { CustomizedSnackbars } from '../../../components/Common/Toast';
 import EndpointModal from './EndpointModal';
+import CommonButton from '../../../components/Common/Button';
+import { Box } from '@mui/material';
+import { TextField, InputAdornment }  from '@mui/material'; 
+import SearchIcon from '@mui/icons-material/Search';
 
 export function EndpointTab() {
     return (
@@ -80,16 +83,31 @@ export function EndpointLoader() {
             overflowY: 'auto'
           }}
           title={
-            <Button
-              component="label"
-              role={undefined}
-              variant="contained"
-              tabIndex={-1}
-              startIcon={<AddIcon />}
-              onClick={handleCreateEndpoint}
-            >
-              CREATE ENDPOINT
-            </Button>
+            <Box sx={{ display: 'flex', gap: '10px', justifyContent: 'space-between', alignItems: 'center' }}>
+              <TextField
+                variant="outlined"
+                placeholder="Search..."
+                size="small"
+                style={{ width: '400px' }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
+                // Add onChange handler if needed
+              />
+              <CommonButton
+                label="CREATE ENDPOINT"
+                component="label"
+                role={undefined}
+                variant="contained"
+                tabIndex={-1}
+                startIcon={<AddIcon />}
+                onClick={handleCreateEndpoint}
+              />
+            </Box>
           }
           page={0}
           count={-1}

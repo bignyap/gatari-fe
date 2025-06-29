@@ -1,7 +1,8 @@
-import { Box, Button, Container, Typography } from '@mui/material';
+import { Box, Container, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Link } from "react-router-dom";
 import image1 from '../assets/404.jpg';
+import CommonButton from '../components/Common/Button';
 
 export default function Error() {
     return (
@@ -29,7 +30,11 @@ export default function Error() {
                 The page you’re looking for doesn’t exist.
               </Typography>
               <Link to={`/`}>
-                <Button variant="contained" sx={{ mt: 2 }}>Back Home</Button>
+                <CommonButton 
+                  label='Back Home'
+                  variant="contained" 
+                  sx={{ mt: 2 }}
+                />
               </Link>
             </Grid>
           </Grid>

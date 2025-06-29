@@ -1,14 +1,15 @@
 import {
     PostData, DeleteData, GetData, BuildUrl
  } from './Utils';
-import {
-    API_PATHS, API_BASE_URL
-} from './Paths';
+ import { getApiBaseUrl, API_PATHS } from './Paths';
 
-const SUBSCRIPTION_TIER_API_BASE_URL = BuildUrl(API_BASE_URL, API_PATHS["subscriptionTier"]);
+
+function getsubscriptionTierUrl(): string {
+  return BuildUrl(getApiBaseUrl(), API_PATHS["subscriptionTier"]);
+}
 
 export async function CreateSubscriptionTier(data: Record<string, any>): Promise<any> {
-  return PostData(SUBSCRIPTION_TIER_API_BASE_URL, data);
+  return PostData(getsubscriptionTierUrl(), data);
 }
 
 export async function ListSubscriptionTiers(pageNumber: number, itemsPerPage: number): Promise<any> {
@@ -17,7 +18,7 @@ export async function ListSubscriptionTiers(pageNumber: number, itemsPerPage: nu
       items_per_page: itemsPerPage.toString()
     };
   
-    const endpoints = await GetData(SUBSCRIPTION_TIER_API_BASE_URL, queryParams);
+    const endpoints = await GetData(getsubscriptionTierUrl(), queryParams);
 
     if (endpoints["total_items"] > 0) {
       endpoints["data"] = endpoints["data"].map((org: any) => createSubscriptionTierData(org));
@@ -40,7 +41,7 @@ export async function ListAllSubscriptionTiers(): Promise<any> {
             page_number: currentPage.toString(),
             items_per_page: itemsPerPage.toString()
         };
-        fetchedItems = await GetData(SUBSCRIPTION_TIER_API_BASE_URL, queryParams);
+        fetchedItems = await GetData(getsubscriptionTierUrl(), queryParams);
         allSubTiers = allSubTiers.concat(fetchedItems["data"].map((org: any) => createSubscriptionTierData(org)));
         currentPage++;
     } while (fetchedItems["data"].length === itemsPerPage);
@@ -49,11 +50,11 @@ export async function ListAllSubscriptionTiers(): Promise<any> {
 }
 
 export async function DeleteSubscriptionTier(id: string): Promise<void> {
-  await DeleteData(`${SUBSCRIPTION_TIER_API_BASE_URL}/${id}`);
+  await DeleteData(`${getsubscriptionTierUrl()}/${id}`);
 }
 
 export async function CreateSubscriptionTierInBulk(data: Array<Record<string, any>>): Promise<any> {
-  const url = `${SUBSCRIPTION_TIER_API_BASE_URL}/batch`;
+  const url = `${getsubscriptionTierUrl()}/batch`;
   return PostData(url, data, { 'Content-Type': 'application/json' }, false);
 }
 

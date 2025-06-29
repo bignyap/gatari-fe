@@ -4,13 +4,13 @@ import { ListOrganizations, DeleteOrganization } from '../../libraries/Organizat
 import OrganizationModal from './OrganizationModal';
 import { EnhancedTable } from '../../components/Table/Table'
 import { HeadCell, FormatCellValue } from '../../components/Table/Utils';
-import Button from '@mui/material/Button'
-// import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import { TextField, InputAdornment }  from '@mui/material'; 
 import { CustomizedSnackbars } from '../../components/Common/Toast';
 import CircularProgress from '@mui/material/CircularProgress';
 import OrgTypeModal from '../OrganizationType/OrgTypeModal';
+import CommonButton from '../../components/Common/Button';
+import AddIcon from '@mui/icons-material/Add';
 
 export function OrganizationPage() {
   return (
@@ -166,25 +166,19 @@ export function OrganizationLoader() {
               // Add onChange handler if needed
             />
             <div style={{ display: 'flex', gap: '10px' }}>
-              <Button
-                component="label"
-                role={undefined}
-                variant="contained"
-                tabIndex={-1}
-                // startIcon={<AddIcon />}
+              <CommonButton
+                label="CREATE ORGANIZATION"
                 onClick={handleCreateOrganization}
-              >
-                CREATE ORGANIZATION
-              </Button>
-              <Button
                 component="label"
-                role={undefined}
-                variant="contained"
-                tabIndex={-1}
+                startIcon={<AddIcon />}
+              />
+
+              <CommonButton
+                label="CREATE ORGANIZATION TYPE"
                 onClick={handleCreateOrgType}
-              >
-                CREATE ORGANIZATION TYPE
-              </Button>
+                component="label"
+                startIcon={<AddIcon />}
+              />
             </div>
           </div>
         }

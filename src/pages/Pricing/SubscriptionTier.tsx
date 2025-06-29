@@ -4,11 +4,12 @@ import { ListSubscriptionTiers, DeleteSubscriptionTier } from '../../libraries/S
 import CircularProgress from '@mui/material/CircularProgress';
 import { EnhancedTable } from '../../components/Table/Table'
 import { HeadCell, FormatCellValue } from '../../components/Table/Utils';
-import Button from '@mui/material/Button'
 import SearchIcon from '@mui/icons-material/Search';
 import { CustomizedSnackbars } from '../../components/Common/Toast';
 import TierModal from './TierModal';
 import { TextField, InputAdornment }  from '@mui/material'; 
+import CommonButton from '../../components/Common/Button';
+import AddIcon from '@mui/icons-material/Add';
 
 export function SubScriptionTierTab() {
     return (
@@ -157,16 +158,15 @@ export function SubScriptionTierLoader() {
                 // Add onChange handler if needed
               />
               <div style={{ display: 'flex', gap: '10px' }}>
-                <Button
+                <CommonButton
+                  label='CREATE SUBSCRIPTION TIER'
                   component="label"
                   role={undefined}
                   variant="contained"
                   tabIndex={-1}
-                  // startIcon={<AddIcon />}
+                  startIcon={<AddIcon />}
                   onClick={handleCreateTier}
-                >
-                  CREATE SUBSCRIPTION TIER
-                </Button>
+                />
               </div>
             </div>
           }

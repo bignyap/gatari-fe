@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from 'react-router-dom';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { ArrowBack } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { EnhancedTable } from '../../components/Table/Table'
@@ -11,6 +11,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import { TextField, InputAdornment }  from '@mui/material';
 import { HeadCell, FormatCellValue } from '../../components/Table/Utils';
 import TierPricingModal from "./PricingModal";
+import CommonButton from "../../components/Common/Button";
 
 export function ViewTierPricingPage() {
     const navigate = useNavigate();
@@ -112,13 +113,12 @@ function ViewTierPricingLoader(navigate: (path: string) => void): JSX.Element {
             )}
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                 <Typography variant="h4">{"Add the tier name here"}</Typography>
-                <Button
+                <CommonButton
+                    label="Back"
                     variant="contained"
                     startIcon={<ArrowBack />}
                     onClick={() => navigate('/subTier')}
-                >
-                    Back
-                </Button>
+                />
             </Box>
             <EnhancedTable
                 rows={tierPricing}
@@ -163,16 +163,15 @@ function ViewTierPricingLoader(navigate: (path: string) => void): JSX.Element {
                     // Add onChange handler if needed
                     />
                     <div style={{ display: 'flex', gap: '10px' }}>
-                    <Button
+                    <CommonButton
+                        label="CREATE Tier Pricings"
                         component="label"
                         role={undefined}
                         variant="contained"
                         tabIndex={-1}
                         // startIcon={<AddIcon />}
                         onClick={handleCreateTierPricing}
-                    >
-                        CREATE Tier Pricings
-                    </Button>
+                    />
                     </div>
                 </div>
                 }

@@ -1,14 +1,14 @@
 import {
     PostData, DeleteData, GetData, BuildUrl
  } from './Utils';
-import {
-    API_PATHS, API_BASE_URL
-} from './Paths';
+ import { getApiBaseUrl, API_PATHS } from './Paths';
 
-const SUBSCRIPTION_API_BASE_URL = BuildUrl(API_BASE_URL, API_PATHS["subscription"]);
+function getsubscriptionUrl(): string {
+  return BuildUrl(getApiBaseUrl(), API_PATHS["subscription"]);
+}
 
 export async function CreateSubscription(data: Record<string, any>): Promise<any> {
-  return PostData(SUBSCRIPTION_API_BASE_URL, data);
+  return PostData(getsubscriptionUrl(), data);
 }
 
 export async function ListSubscriptions(pageNumber: number, itemsPerPage: number): Promise<any> {
@@ -17,7 +17,7 @@ export async function ListSubscriptions(pageNumber: number, itemsPerPage: number
       items_per_page: itemsPerPage.toString()
     };
   
-    const subscriptions = await GetData(SUBSCRIPTION_API_BASE_URL, queryParams);
+    const subscriptions = await GetData(getsubscriptionUrl(), queryParams);
 
     if (subscriptions["total_items"] > 0) {
       subscriptions["data"] = subscriptions["data"].map((org: any) => createSubscriptionData(org));
@@ -33,7 +33,7 @@ export async function ListSubscriptionByOrgIds(orgId: number, pageNumber: number
   };
 
   
-  const finalUrl = BuildUrl(SUBSCRIPTION_API_BASE_URL, "orgId", orgId.toString());
+  const finalUrl = BuildUrl(getsubscriptionUrl(), "orgId", orgId.toString());
 
   const subscriptions = await GetData(finalUrl, queryParams);
 
@@ -45,23 +45,23 @@ export async function ListSubscriptionByOrgIds(orgId: number, pageNumber: number
 }
 
 export async function GetSubscriptionById(id: number): Promise<any> {
-  return GetData(`${SUBSCRIPTION_API_BASE_URL}/${id}`);
+  return GetData(`${getsubscriptionUrl()}/${id}`);
 }
 
 export async function GetSubscriptionByOrgId(id: string): Promise<any> {
-    return GetData(`${SUBSCRIPTION_API_BASE_URL}/orgId/${id}`);
+    return GetData(`${getsubscriptionUrl()}/orgId/${id}`);
   }
 
 export async function DeleteSubscription(id: string): Promise<void> {
-  await DeleteData(`${SUBSCRIPTION_API_BASE_URL}/${id}`);
+  await DeleteData(`${getsubscriptionUrl()}/${id}`);
 }
 
 export async function DeleteSubscriptionByOrgId(id: string): Promise<any> {
-    return DeleteData(`${SUBSCRIPTION_API_BASE_URL}${id}`);
+    return DeleteData(`${getsubscriptionUrl()}${id}`);
   }
 
 export async function CreateSubscriptionInBulk(data: Array<Record<string, any>>): Promise<any> {
-  const url = `${SUBSCRIPTION_API_BASE_URL}/batch`;
+  const url = `${getsubscriptionUrl()}/batch`;
   return PostData(url, data, { 'Content-Type': 'application/json' }, false);
 }
 

@@ -12,7 +12,7 @@
     align-content: center;
 }
 
-.container {
+/* .container {
     display: flex;
     flex-direction: column;
     height: 90vh;
@@ -20,7 +20,19 @@
     max-width: 90vw;
     padding: 50px;
     box-sizing: border-box;
-}
+} */
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;         /* Center child content horizontally */
+    justify-content: flex-start; /* Align children to the top */
+    width: 100%;
+    padding: 2rem;
+    box-sizing: border-box;
+    height: 100vh;               /* Or 100% if inside a parent container */
+    margin: 0;
+  }
 
 .tabs-wrapper {
     display: flex;

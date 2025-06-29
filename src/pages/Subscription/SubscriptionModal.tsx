@@ -4,12 +4,12 @@ import { ListAllSubscriptionTiers } from '../../libraries/SubscriptionTier';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import { CustomizedSnackbars } from '../../components/Common/Toast';
+import CommonButton from '../../components/Common/Button';
 
 interface SubscriptionFormProps {
     onClose: () => void;
@@ -211,22 +211,18 @@ const SubscriptionModal: React.FC<SubscriptionFormProps> = ({ onClose, onSubscri
                   onChange={handleChange}
               />
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-              <Button 
+              <CommonButton 
+                  label='Create'
                   type="submit" 
                   variant="contained" 
-                  color="primary"
                   onClick={handleSubmit} 
-              >
-                Create
-              </Button>
-              <Button 
+             />
+              <CommonButton 
+                  label='Cancel'
                   type="button" 
                   onClick={onClose} 
                   variant="outlined" 
-                  color="secondary"
-              >
-                Cancel
-              </Button>
+              />
             </Box>
           </form>
         </Box>

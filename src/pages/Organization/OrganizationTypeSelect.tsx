@@ -12,9 +12,10 @@ interface OrganizationType {
 interface OrganizationTypeSelectProps {
   value: number;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
 }
 
-const OrganizationTypeSelect: React.FC<OrganizationTypeSelectProps> = ({ value, onChange }) => {
+const OrganizationTypeSelect: React.FC<OrganizationTypeSelectProps> = ({ value, onChange, disabled }) => {
   const [organizationTypes, setOrganizationTypes] = useState<OrganizationType[]>([]);
   const [snackbar, setSnackbar] = useState<{ message: string; status: string } | null>(null);
 
@@ -35,9 +36,6 @@ const OrganizationTypeSelect: React.FC<OrganizationTypeSelectProps> = ({ value, 
     fetchOrganizationTypes();
   }, []);
 
-    console.log(organizationTypes);
-    console.log(value);
-  // Ensure the value is valid or set to an empty string
   const selectedValue = organizationTypes.some(type => type.id === value) ? value : '';
 
   return (
@@ -59,6 +57,7 @@ const OrganizationTypeSelect: React.FC<OrganizationTypeSelectProps> = ({ value, 
         value={selectedValue}
         onChange={onChange}
         required
+        disabled={disabled}
       >
         {organizationTypes.map((type) => (
           <MenuItem key={type.id} value={type.id}>

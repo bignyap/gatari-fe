@@ -1,14 +1,14 @@
 import {
     PostData, DeleteData, GetData, BuildUrl
  } from './Utils';
-import {
-    API_PATHS, API_BASE_URL
-} from './Paths';
+import { getApiBaseUrl, API_PATHS } from './Paths';
 
-const ENDPOINT_API_BASE_URL = BuildUrl(API_BASE_URL, API_PATHS["endpoint"]);
+function getEndpointUrl(): string {
+  return BuildUrl(getApiBaseUrl(), API_PATHS["endpoint"]);
+}
 
 export async function CreateEndpoint(data: Record<string, any>): Promise<any> {
-  return PostData(ENDPOINT_API_BASE_URL, data);
+  return PostData(getEndpointUrl(), data);
 }
 
 export async function ListEndpoints(pageNumber: number, itemsPerPage: number): Promise<any> {
@@ -17,17 +17,17 @@ export async function ListEndpoints(pageNumber: number, itemsPerPage: number): P
       items_per_page: itemsPerPage.toString()
     };
   
-    const endpoints = await GetData(ENDPOINT_API_BASE_URL, queryParams);
+    const endpoints = await GetData(getEndpointUrl(), queryParams);
     
     return endpoints.map((endpoint: any) => createEndpointData(endpoint));
   }
 
 export async function DeleteEndpoint(id: string): Promise<void> {
-  await DeleteData(`${ENDPOINT_API_BASE_URL}/${id}`);
+  await DeleteData(`${getEndpointUrl()}/${id}`);
 }
 
 export async function CreateEndpointInBulk(data: Array<Record<string, any>>): Promise<any> {
-  const url = `${ENDPOINT_API_BASE_URL}/batch`;
+  const url = `${getEndpointUrl()}/batch`;
   return PostData(url, data, { 'Content-Type': 'application/json' }, false);
 }
 
@@ -42,7 +42,7 @@ export async function ListAllEndpoints(): Promise<any> {
           page_number: currentPage.toString(),
           items_per_page: itemsPerPage.toString()
       };
-      fetchedItems = await GetData(ENDPOINT_API_BASE_URL, queryParams);
+      fetchedItems = await GetData(getEndpointUrl(), queryParams);
       allEndpoints = allEndpoints.concat(fetchedItems.map((org: any) => createEndpointData(org)));
       currentPage++;
   } while (fetchedItems.length === itemsPerPage);

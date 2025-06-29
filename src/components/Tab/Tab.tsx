@@ -3,6 +3,7 @@ import Tabs, { tabsClasses } from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import { NavLink } from 'react-router-dom';
+import { styled } from '@mui/material/styles';
 
 interface TabItem {
   label: string;
@@ -14,6 +15,34 @@ interface ScrollableTabsButtonAutoProps {
   onTabChange: (newTab: string) => void;
   initialIndex?: number;
 }
+
+const TEAL = '#00897b';
+
+// Styled Tab
+const StyledTab = styled(Tab)(({ theme }) => ({
+  minHeight: 36,
+  padding: theme.spacing(0.5, 1.5),
+  fontSize: '0.8rem',
+  fontWeight: 500,
+  textTransform: 'uppercase',
+  color: theme.palette.text.primary,
+  '&:hover': {
+    color: TEAL,
+  },
+  '&.Mui-selected': {
+    color: TEAL,
+    fontWeight: 600,
+  },
+}));
+
+// Styled Tabs container
+const StyledTabs = styled(Tabs)(({ theme }) => ({
+  minHeight: 36,
+  '& .MuiTabs-indicator': {
+    backgroundColor: TEAL,
+    height: 3,
+  },
+}));
 
 export default function ScrollableTabsButtonAuto(
   props: ScrollableTabsButtonAutoProps
@@ -29,44 +58,40 @@ export default function ScrollableTabsButtonAuto(
   };
 
   return (
-    <Box 
+    <Box
       sx={{
         flexGrow: 1,
         maxWidth: { xs: '100%', md: '800px' },
         width: '100%',
         bgcolor: 'background.paper',
-        height: 'auto',
       }}
     >
-      <Tabs
+      <StyledTabs
         value={props.tabs[value]?.value || ''}
         onChange={handleChange}
-        variant="standard" // Change to 'standard' to remove scroll buttons
-        aria-label="scrollable auto tabs example"
+        variant="standard"
+        aria-label="styled compact tabs"
         sx={{
-          justifyContent: 'flex-start', // Align tabs to the left
           [`& .${tabsClasses.scrollButtons}`]: {
-            display: 'none', // Hide scroll buttons
+            display: 'none',
           },
         }}
       >
         {props.tabs.map((tab, index) => (
-          <Tab 
-            key={index} 
+          <StyledTab
+            key={index}
             label={
-              <NavLink 
-                to={`/resources/${tab.value}`} 
+              <NavLink
+                to={`/resources/${tab.value}`}
                 style={{ textDecoration: 'none', color: 'inherit' }}
-                className={({ isActive }) => isActive ? 'active-tab' : ''}
               >
                 {tab.label}
               </NavLink>
             }
             value={tab.value}
-            sx={{ fontWeight: 'Bold' }} 
           />
         ))}
-      </Tabs>
+      </StyledTabs>
     </Box>
   );
 }

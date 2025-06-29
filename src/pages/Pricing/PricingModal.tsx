@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { CreateSubscription } from '../../libraries/Subscription';
 import { ListAllEndpoints } from '../../libraries/Endpoint';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import { CustomizedSnackbars } from '../../components/Common/Toast';
 import { CreateTierPricing } from '../../libraries/TierPricing';
+import CommonButton from '../../components/Common/Button';
 
 interface TierPricingFormProps {
     onClose: () => void;
@@ -151,22 +150,18 @@ const TierPricingModal: React.FC<TierPricingFormProps> = ({ onClose, onTierPrici
                   required
               />
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-              <Button 
+              <CommonButton
+                  label='Create' 
                   type="submit" 
                   variant="contained" 
-                  color="primary"
                   onClick={handleSubmit} 
-              >
-                Create
-              </Button>
-              <Button 
+              />
+              <CommonButton
+                  label='Cancel' 
                   type="button" 
                   onClick={onClose} 
                   variant="outlined" 
-                  color="secondary"
-              >
-                Cancel
-              </Button>
+              />
             </Box>
           </form>
         </Box>

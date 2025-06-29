@@ -2,167 +2,142 @@ import { styled } from '@mui/material/styles';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 
-export function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
-    if (b[orderBy] < a[orderBy]) {
-      return -1;
-    }
-    if (b[orderBy] > a[orderBy]) {
-      return 1;
-    }
-    return 0;
-  }
-
 export type Order = 'asc' | 'desc';
+
+export interface Data {
+  [key: string]: any;
+}
+
+export interface HeadCell {
+  id: string;
+  label: string;
+  width?: number;
+}
+
+export function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
+  if (b[orderBy] < a[orderBy]) return -1;
+  if (b[orderBy] > a[orderBy]) return 1;
+  return 0;
+}
 
 export function getComparator<Key extends keyof any>(
   order: Order,
-  orderBy: Key,
+  orderBy: Key
 ): (
   a: { [key in Key]: number | string },
-  b: { [key in Key]: number | string },
+  b: { [key in Key]: number | string }
 ) => number {
   return order === 'desc'
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
-export interface Data {
-    [key: string]: any;
-}
-  
-export interface HeadCell {
-    // disablePadding: boolean;
-    id: string;
-    label: string;
-    width?: number;
-    // numeric: boolean;
-}
+const commonFont = {
+  fontSize: '0.85rem',
+  fontFamily: 'Inter, Roboto, system-ui, sans-serif',
+};
 
 export const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    [`&.${tableCellClasses.head}`]: {
-      backgroundColor: theme.palette.grey[200],
-      color: theme.palette.primary,
-      whiteSpace: 'nowrap',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      maxWidth: '200px',
-      position: 'relative',
-      '&::after': {
-        content: '""',
-        position: 'absolute',
-        right: 0,
-        top: '25%',
-        height: '50%',
-        width: '1px',
-        backgroundColor: theme.palette.divider,
-        opacity: 0.5,
-      },
+  ...commonFont,
+  [`&.${tableCellClasses.head}`]: {
+    backgroundColor: 'rgba(255, 255, 255, 0.35)',
+    backdropFilter: 'blur(6px)',
+    WebkitBackdropFilter: 'blur(6px)',
+    color: '#ffffff',
+    fontWeight: 600,
+    whiteSpace: 'nowrap',
+    padding: theme.spacing(1, 2),
+    borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+  },
+  [`&.${tableCellClasses.body}`]: {
+    color: theme.palette.text.primary,
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    maxWidth: '240px',
+    position: 'relative',
+    padding: theme.spacing(1, 2),
+    '&:hover::after': {
+      content: 'attr(data-full-text)',
+      position: 'absolute',
+      backgroundColor: theme.palette.background.paper,
+      padding: '8px',
+      borderRadius: '4px',
+      boxShadow: theme.shadows[1],
+      whiteSpace: 'normal',
+      zIndex: 10,
+      top: '100%',
+      left: 0,
+      transform: 'translateY(5px)',
     },
-    [`&.${tableCellClasses.body}`]: {
-      fontSize: 14,
-      whiteSpace: 'nowrap',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      maxWidth: '200px',
-      position: 'relative',
-      '&:hover::after': {
-        content: 'attr(data-full-text)',
-        position: 'absolute',
-        backgroundColor: theme.palette.background.paper,
-        padding: '10px',
-        borderRadius: '4px',
-        boxShadow: theme.shadows[1],
-        whiteSpace: 'normal',
-        zIndex: 1,
-        top: '100%',
-        left: 0,
-        transform: 'translateY(5px)'
-      },
-    },
-  }));
+  },
+}));
 
+export const StickyTableCell = styled(TableCell)(({ theme }) => ({
+  ...commonFont,
+  [`&.${tableCellClasses.head}`]: {
+    backgroundColor: 'rgba(255, 255, 255, 0.35)', // ← same as CommonButton default
+    backdropFilter: 'blur(10px)',
+    WebkitBackdropFilter: 'blur(10px)',
+    color: '#1a1a1a',
+    fontSize: '0.85rem',
+    fontWeight: 600,
+    fontFamily: 'Inter, Roboto, system-ui, sans-serif',
+    whiteSpace: 'nowrap',
+    padding: theme.spacing(1, 2),
+    borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
+  },
+  [`&.${tableCellClasses.body}`]: {
+    position: 'sticky',
+    left: 0,
+    zIndex: 2,
+    backgroundColor: theme.palette.background.paper,
+    padding: theme.spacing(1, 2),
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    maxWidth: '240px',
+    '&:hover::after': {
+      content: 'attr(data-full-text)',
+      position: 'absolute',
+      backgroundColor: theme.palette.background.paper,
+      padding: '8px',
+      borderRadius: '4px',
+      boxShadow: theme.shadows[1],
+      whiteSpace: 'normal',
+      zIndex: 10,
+      top: '100%',
+      left: 0,
+      transform: 'translateY(5px)',
+    },
+  },
+}));
 
-  export const StickyTableCell = styled(TableCell)(({ theme }) => ({
-    [`&.${tableCellClasses.head}`]: {
-      position: "sticky",
-      backgroundColor: theme.palette.grey[200],
-      boxShadow: "5px 2px 5px grey",
-      zIndex: 1,
-      whiteSpace: 'nowrap',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      maxWidth: '200px',
-      color: theme.palette.primary,
-      '&::after': {
-        content: '""',
-        position: 'absolute',
-        right: 0,
-        top: '25%',
-        height: '50%',
-        width: '1px',
-        backgroundColor: theme.palette.divider,
-        opacity: 0.5,
-      },
-    },
-    [`&.${tableCellClasses.body}`]: {
-      position: "sticky",
-      backgroundColor: "white",
-      boxShadow: "5px 2px 5px grey",
-      fontSize: 14,
-      whiteSpace: 'nowrap',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      maxWidth: '200px',
-      zIndex: 1,
-      '&:hover::after': {
-        content: 'attr(data-full-text)',
-        position: 'absolute',
-        backgroundColor: theme.palette.background.paper,
-        padding: '10px',
-        borderRadius: '4px',
-        boxShadow: theme.shadows[1],
-        whiteSpace: 'normal',
-        zIndex: 1,
-        top: '100%',
-        left: 0,
-        transform: 'translateY(5px)',
-      },
-    },
-  }));
-  
 export const StyledTableRow = styled(TableRow)(({ theme }) => ({
-    '&:nth-of-type(odd)': {
-      backgroundColor: theme.palette.action.hover,
-    },
-    // hide last border
-    '&:last-child td, &:last-child th': {
-      border: 0,
-    },
-  }));
+  transition: 'background-color 0.2s ease-in-out',
+  '&:nth-of-type(odd)': {
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+  },
+  '&:hover': {
+    backgroundColor: 'rgba(81, 20, 20, 0.08)',
+  },
+  '&:last-child td, &:last-child th': {
+    border: 0,
+  },
+}));
 
 export const StickyTableRow = styled(TableRow)(({ theme }) => ({
-    position: 'sticky',
-    top: 0,
-    zIndex: 2, // Ensure it stays above other rows
-    backgroundColor: theme.palette.background.default, // Ensure the background is consistent
-    '&:nth-of-type(odd)': {
-      backgroundColor: theme.palette.action.hover,
-    },
-    // hide last border
-    '&:last-child td, &:last-child th': {
-      border: 0,
-    },
-  }));
+  position: 'sticky',
+  top: 0,
+  zIndex: 4,
+  backgroundColor: 'rgba(33, 48, 66, 0.85)',
+  backdropFilter: 'blur(6px)',
+  WebkitBackdropFilter: 'blur(6px)',
+}));
 
 export function FormatCellValue(cellValue: any): any {
-    if (cellValue === null) {
-      return "--";
-    }
-    if (typeof cellValue === 'boolean') {
-      return cellValue ? "True" : "False";
-    }
-    if (typeof cellValue === 'object') {
-      return JSON.stringify(cellValue);
-    }
-    return cellValue;
-  }
+  if (cellValue === null) return "--";
+  if (typeof cellValue === 'boolean') return cellValue ? "True" : "False";
+  if (typeof cellValue === 'object') return JSON.stringify(cellValue);
+  return cellValue;
+}

@@ -2,14 +2,14 @@ import {
     PostData, DeleteData,
     PutData, GetData, BuildUrl
  } from './Utils';
-import {
-    API_PATHS, API_BASE_URL
-} from './Paths';
+ import { getApiBaseUrl, API_PATHS } from './Paths';
 
-const ORGANIZATION_TYPE_API_BASE_URL = BuildUrl(API_BASE_URL, API_PATHS["organizationType"])
+function getOrganizationTypeUrl(): string {
+  return BuildUrl(getApiBaseUrl(), API_PATHS["organizationType"]);
+}
 
 export async function CreateOrganizationType(data: Record<string, any>): Promise<any> {
-  return PostData(ORGANIZATION_TYPE_API_BASE_URL, data);
+  return PostData(getOrganizationTypeUrl(), data);
 }
 
 export async function ListOrganizationTypes(pageNumber: number, itemsPerPage: number): Promise<any> {
@@ -17,7 +17,7 @@ export async function ListOrganizationTypes(pageNumber: number, itemsPerPage: nu
       page_number: pageNumber.toString(),
       items_per_page: itemsPerPage.toString()
     };
-    const organizations = await GetData(ORGANIZATION_TYPE_API_BASE_URL, queryParams);
+    const organizations = await GetData(getOrganizationTypeUrl(), queryParams);
     
     return organizations.map((org: any) => createOrganizationTypeData(org));
   }
@@ -33,7 +33,7 @@ export async function ListAllOrganizationTypes(): Promise<any> {
             page_number: currentPage.toString(),
             items_per_page: itemsPerPage.toString()
         };
-        fetchedItems = await GetData(ORGANIZATION_TYPE_API_BASE_URL, queryParams);
+        fetchedItems = await GetData(getOrganizationTypeUrl(), queryParams);
         allOrganizations = allOrganizations.concat(fetchedItems.map((org: any) => createOrganizationTypeData(org)));
         currentPage++;
     } while (fetchedItems.length === itemsPerPage);
@@ -42,11 +42,11 @@ export async function ListAllOrganizationTypes(): Promise<any> {
 }
 
 export async function DeleteOrganizationType(id: string): Promise<void> {
-  await DeleteData(`${ORGANIZATION_TYPE_API_BASE_URL}/${id}`);
+  await DeleteData(`${getOrganizationTypeUrl()}/${id}`);
 }
 
 export async function CreateOrganizationTypeInBulk(data: Array<Record<string, any>>): Promise<any> {
-  const url = BuildUrl(ORGANIZATION_TYPE_API_BASE_URL, 'batch');
+  const url = BuildUrl(getOrganizationTypeUrl(), 'batch');
   return PostData(url, data, { 'Content-Type': 'application/json' }, false);
 }
 
