@@ -111,14 +111,15 @@ function ViewTierPricingLoader(navigate: (path: string) => void): JSX.Element {
                     onClose={() => setSnackbar(null)}
                 />
             )}
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                <Typography variant="h4">{"Add the tier name here"}</Typography>
+            <Box width="100%" mb={2}>
+              <Box display="flex" justifyContent="flex-end">
                 <CommonButton
-                    label="Back"
-                    variant="contained"
-                    startIcon={<ArrowBack />}
-                    onClick={() => navigate('/subTier')}
+                  label="Back"
+                  variant="contained"
+                  startIcon={<ArrowBack />}
+                  onClick={() => navigate('/subTier')}
                 />
+              </Box>
             </Box>
             <EnhancedTable
                 rows={tierPricing}

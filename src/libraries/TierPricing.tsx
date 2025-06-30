@@ -29,7 +29,7 @@ export async function GetTierPricingBySubTierId(tierId: number, pageNumber: numb
   }
 
 export async function DeleteTierPricing(id: number): Promise<void> {
-  await DeleteData(`${gettierPricingUrl()}/${id}`);
+  await DeleteData(`${gettierPricingUrl()}/id/${id}`);
 }
 
 export async function DeleteTierPricingBySubId(id: number): Promise<void> {
