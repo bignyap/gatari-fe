@@ -150,7 +150,6 @@ function ViewOrganizationLoader({ navigate }: { navigate: (path: string) => void
                 }
                 editorMode={false}
                 alwaysEditMode={false}
-                editorHeight="10px"
               />
             )}
           </AccordionDetails>

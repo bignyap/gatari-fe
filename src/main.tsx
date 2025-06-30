@@ -8,9 +8,10 @@ const root = ReactDOM.createRoot(document.getElementById('root')!);
 
 loadConfig().then(() => {
   root.render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
+    // <React.StrictMode>
+    //   <App />
+    // </React.StrictMode>
+    <App />
   );
 }).catch((error) => {
   root.render(

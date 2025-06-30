@@ -8,7 +8,7 @@ import {
 import OrganizationTypeSelect from './OrganizationTypeSelect';
 import ConfigEditor from './ConfigEditor';
 import { CustomizedSnackbars } from '../../components/Common/Toast';
-import Grid from '@mui/material/Grid2';
+import { Grid, SxProps, Theme } from '@mui/material';
 import CommonButton from '../../components/Common/Button';
 
 interface OrganizationFormProps {
@@ -21,10 +21,20 @@ interface OrganizationFormProps {
   disabled?: boolean;
 }
 
-function GridComponentInEdit({ value, size }: { value: React.ReactNode, size: { xs: number, sm: number } }) {
+interface GridComponentInEditProps {
+  value: React.ReactNode;
+  size: { xs: number; sm: number };
+  sx?: SxProps<Theme>;
+}
+
+export function GridComponentInEdit({
+  value,
+  size,
+  sx = {},
+}: GridComponentInEditProps) {
   return (
-    <Grid size={{ xs: size.xs, sm: size.sm }}>
-        {value}
+    <Grid item xs={size.xs} sm={size.sm} sx={sx}>
+      {value}
     </Grid>
   );
 }
@@ -178,22 +188,40 @@ const OrganizationForm: React.FC<OrganizationFormProps> = (
       )}
 
       {activeTab === 1 && includeConfig && (
-        <Grid 
-          container 
-          spacing={2} 
-          justifyContent="flex-start" 
-          alignItems="flex-start" 
-          sx={{ mb: 2, minHeight: '270px', maxHeight: '300px', minWidth: '800px', overflowY: 'auto' }}
+        <Grid
+          container
+          spacing={0}
+          justifyContent="flex-start"
+          alignItems="flex-start"
+          sx={{
+            mb: 2,
+            minWidth: '800px',
+            background: 'none',
+            border: 'none',
+            boxShadow: 'none',
+            padding: 0,
+          }}
         >
-          <GridComponentInEdit value={
-            <ConfigEditor
-              config={formData.config}
-              onConfigChange={(newConfig) => setFormData({ ...formData, config: newConfig })}
-              editorMode={false}
-              alwaysEditMode={includeConfig}
-              disabled={disabled}
-            />
-          } size={{ xs: 12, sm: 12 }} />
+          <GridComponentInEdit
+            value={
+              <ConfigEditor
+                config={formData.config}
+                onConfigChange={(newConfig) =>
+                  setFormData({ ...formData, config: newConfig })
+                }
+                editorMode={false}
+                alwaysEditMode={includeConfig}
+                disabled={disabled}
+              />
+            }
+            size={{ xs: 12, sm: 12 }}
+            sx={{
+              p: 0,
+              background: 'none',
+              border: 'none',
+              boxShadow: 'none',
+            }}
+          />
         </Grid>
       )}
 
