@@ -10,12 +10,13 @@ export function EnhancedTableToolbar({ title }: { title: React.ReactNode }) {
         backgroundColor: 'transparent',
         color: 'inherit',
         minHeight: '48px !important',
-        px: { sm: 2, xs: 1 }
+        px: { sm: 2, xs: 1 },
       }}
     >
       <Typography
         sx={{
-          flex: '1 1 100%',
+          width: '100%',
+          textAlign: 'center',
           fontWeight: 600,
           fontSize: '1rem',
           fontFamily: 'Inter, Roboto, system-ui, sans-serif',

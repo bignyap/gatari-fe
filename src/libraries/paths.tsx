@@ -12,4 +12,5 @@ export const API_PATHS = {
   subscriptionTier: '/subTier',
   subscription: '/subscription',
   tierPricing: '/tierPricing',
+  orgPermission: '/orgPermission'
 };

@@ -32,7 +32,6 @@ export function loadConfig(): Promise<void> {
 }
 
 export function getConfig(): AppConfig {
-  console.log('loading:', loading, 'config:', config);
   if (loading) {
     throw new Error('Config not loaded yet.');
   }

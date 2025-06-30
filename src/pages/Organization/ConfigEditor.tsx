@@ -5,6 +5,7 @@ import { Controlled as CodeMirror } from 'react-codemirror2';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/mode/javascript/javascript';
 import CommonButton from '../../components/Common/Button';
+import { SxProps, Theme } from '@mui/material';
 
 interface ConfigEditorProps {
   config: string;
@@ -14,6 +15,7 @@ interface ConfigEditorProps {
   editorWidth?: string;
   editorHeight?: string;
   disabled?: boolean;
+  cardSx?: SxProps<Theme>;
 }
 
 const ConfigEditor: React.FC<ConfigEditorProps> = ({
@@ -24,6 +26,7 @@ const ConfigEditor: React.FC<ConfigEditorProps> = ({
   editorWidth = '100%',
   editorHeight = '300px',
   disabled = false,
+  cardSx = {},
 }) => {
   const [isConfigEditMode, setIsConfigEditMode] = useState<boolean>(editorMode);
   const editorRef = useRef<any>(null);
@@ -38,9 +41,8 @@ const ConfigEditor: React.FC<ConfigEditorProps> = ({
   }, [alwaysEditMode, isConfigEditMode, disabled]);
 
   return (
-    <Card variant="outlined" sx={{ width: editorWidth }}>
+    <Card variant="outlined" sx={{ width: editorWidth, ...cardSx }}>
       <CardContent>
-
         {/* Action Buttons */}
         {!disabled && !alwaysEditMode && (
           <Box display="flex" justifyContent="flex-end" mb={2} gap={1}>
@@ -95,7 +97,7 @@ const ConfigEditor: React.FC<ConfigEditorProps> = ({
             editorDidMount={(editor) => {
               editorRef.current = editor;
               editor.setSize('100%', editorHeight);
-
+            
               const wrapper = editor.getWrapperElement();
               wrapper.style.backgroundColor = '#f7f9fa';
               wrapper.style.fontSize = '14px';
@@ -104,15 +106,34 @@ const ConfigEditor: React.FC<ConfigEditorProps> = ({
               wrapper.style.padding = '0';
               wrapper.style.textAlign = 'left';
               wrapper.style.margin = '0';
-
+            
               const lines = wrapper.querySelector('.CodeMirror-lines') as HTMLElement;
               if (lines) {
                 lines.style.paddingLeft = '8px';
                 lines.style.margin = '0';
                 lines.style.textAlign = 'left';
               }
+            
+              // Style the gutter container
+              const gutterContainer = wrapper.querySelector('.CodeMirror-gutters') as HTMLElement;
+              if (gutterContainer) {
+                gutterContainer.style.background = 'transparent';
+                gutterContainer.style.borderRight = '1px solid #ddd'; // subtle separator
+                // gutterContainer.style.paddingLeft = '4px';
+                gutterContainer.style.paddingRight = '20px';
+              }
+
+              // Style individual line numbers
+              const gutters = wrapper.querySelectorAll('.CodeMirror-linenumber');
+              gutters.forEach((gutter: Element) => {
+                const el = gutter as HTMLElement;
+                el.style.display = 'inline-block';
+                el.style.width = '100%';
+                el.style.textAlign = 'center';
+              });
+            
               setTimeout(() => editor.refresh(), 0);
-            }}
+            }}            
           />
         </Box>
       </CardContent>

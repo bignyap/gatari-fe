@@ -76,7 +76,9 @@ export const EnhancedTable: React.FC<EnhancedTableProps & { renderCell?: (key: s
       }}
     >
       <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-        <EnhancedTableToolbar title={title} />
+        <Box sx={{ mb: 1.5 }}>
+          <EnhancedTableToolbar title={title} />
+        </Box>
         <TableContainer
           sx={tableContainerSx || {
             maxHeight: '70vh',
@@ -125,7 +127,13 @@ export const EnhancedTable: React.FC<EnhancedTableProps & { renderCell?: (key: s
                           scope={headCell.id === 'name' ? 'row' : undefined}
                           sx={stickyQ ? { position: 'sticky', left: leftPosition, zIndex: 1 } : {}} 
                         >
-                          {renderCell ? renderCell(headCell.id, cellValue, row) : cellValue}
+                          {renderCell 
+                          ? renderCell(headCell.id, cellValue, row) 
+                          : typeof cellValue === 'object' 
+                            ? JSON.stringify(cellValue) 
+                            : String(cellValue ?? '')
+                          }
+
                         </CellComponent>
                       );
                     })}

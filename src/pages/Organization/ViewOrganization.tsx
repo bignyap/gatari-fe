@@ -20,6 +20,7 @@ import { SubscriptionLoader } from '../Subscription/Subscription';
 import OrganizationForm from './OrganizationForm';
 import ConfigEditor from './ConfigEditor';
 import CommonButton from '../../components/Common/Button';
+import PermissionsPage from './Permission'
 
 interface OrganizationRow {
   id: string;
@@ -150,6 +151,10 @@ function ViewOrganizationLoader({ navigate }: { navigate: (path: string) => void
                 }
                 editorMode={false}
                 alwaysEditMode={false}
+                cardSx={{
+                  border: 'none', // disables the default outlined border
+                  boxShadow: 'none' // remove shadow too if needed
+                }}
               />
             )}
           </AccordionDetails>
@@ -174,16 +179,15 @@ function ViewOrganizationLoader({ navigate }: { navigate: (path: string) => void
           </AccordionDetails>
         </Accordion>
 
-        <Accordion  sx={{ width: '100%' }}>
+        <Accordion sx={{ width: '100%' }}>
           <AccordionSummary expandIcon={<ExpandMore />}>
             <Typography fontWeight={600}>Permission</Typography>
           </AccordionSummary>
           <AccordionDetails>
-            <Typography variant="body1" pl={1}>
-              Resource Permission will be shown here.
-            </Typography>
+            {organization && <PermissionsPage organizationId={Number(organization.id)} />}
           </AccordionDetails>
         </Accordion>
+
 
         <Accordion  sx={{ width: '100%' }}>
           <AccordionSummary expandIcon={<ExpandMore />}>
