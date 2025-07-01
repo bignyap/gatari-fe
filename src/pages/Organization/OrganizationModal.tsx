@@ -2,7 +2,6 @@ import React from 'react';
 import { CreateOrganization } from '../../libraries/Organization';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
 import OrganizationForm from './OrganizationForm';
 
 interface OrganizationFormProps {

@@ -1,5 +1,6 @@
 import {
-    PostData, DeleteData, GetData, BuildUrl
+    PostData, DeleteData, GetData, BuildUrl,
+    PutData
  } from './Utils';
  import { getApiBaseUrl, API_PATHS } from './Paths';
 
@@ -9,6 +10,10 @@ function getOrganizationUrl(): string {
 
 export async function CreateOrganization(data: Record<string, any>): Promise<any> {
   return PostData(getOrganizationUrl(), data);
+}
+
+export async function UpdateOrganization(data: Record<string, any>): Promise<any> {
+  return PutData(getOrganizationUrl(), data);
 }
 
 export async function ListOrganizations(pageNumber: number, itemsPerPage: number): Promise<any> {

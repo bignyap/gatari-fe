@@ -12,16 +12,17 @@ export async function CreateOrgPermission(data: Record<string, any>): Promise<an
   return PostData(getOrgPermissionUrl(), data);
 }
 
-export async function ListOrgPermission(orgId:number, pageNumber: number, itemsPerPage: number): Promise<any> {
-    const queryParams = {
-      page_number: pageNumber.toString(),
-      items_per_page: itemsPerPage.toString()
-    };
-  
-    const endpoints = await GetData(`${getOrgPermissionUrl()}/${orgId}`, queryParams);
-    
-    return endpoints.map((endpoint: any) => createOrgPermissionData(endpoint));
-  }
+export async function ListOrgPermission(orgId: number, pageNumber: number, itemsPerPage: number): Promise<any[]> {
+  const queryParams = {
+    page_number: pageNumber.toString(),
+    items_per_page: itemsPerPage.toString(),
+  };
+
+  const response = await GetData(`${getOrgPermissionUrl()}/${orgId}`, queryParams);
+  const orgPermissions = response?.data ?? [];
+
+  return orgPermissions.map((orgPermission: any) => createOrgPermissionData(orgPermission));
+}
 
 export async function DeleteOrgPermission(id: string): Promise<void> {
   await DeleteData(`${getOrgPermissionUrl()}/${id}`);
@@ -29,9 +30,9 @@ export async function DeleteOrgPermission(id: string): Promise<void> {
 
 function createOrgPermissionData(orgPermission: any): OrgPermissionData {
     return {
-        resourceTypeId: orgPermission.resourceTypeId,
-        organizationId: orgPermission.organizationId,
-        permissionCode: orgPermission.permissionCode,
+        resourceTypeId: orgPermission.resource_type_id,
+        organizationId: orgPermission.organization_id,
+        permissionCode: orgPermission.permission_code,
     };
 }
 

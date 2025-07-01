@@ -87,13 +87,14 @@ const PermissionGrid: React.FC<{ organizationId: number }> = ({ organizationId }
     try {
       const allPermissions = await ListOrgPermission(organizationId, 1, 100);
       const resources = await ListResourceTypes(1, 100);
-      setOrgPermissions(allPermissions);
+      setOrgPermissions(allPermissions ?? [])
       setResourceTypes(resources);
       setEditedPermissions(
         new Set(allPermissions.map((p: any) => `${p.resourceTypeId}-${p.permissionCode}`))
       );
     } catch (error) {
       console.error('Error loading data:', error);
+      setOrgPermissions([]);
     } finally {
       setLoading(false);
     }

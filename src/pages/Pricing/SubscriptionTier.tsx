@@ -191,6 +191,6 @@ export function SubScriptionTierLoader() {
     { id: 'name', label: 'Name', width: 20 },
     { id: 'archived', label: 'Archived' },
     { id: 'description', label: 'Description' },
-    { id: 'created_at', label: 'created_at'},
-    { id: 'updated_at', label: 'updated_at'}
+    { id: 'created_at', label: 'Created At'},
+    { id: 'updated_at', label: 'Updated At'}
   ];

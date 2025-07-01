@@ -12,15 +12,18 @@ import {
   Cancel,
   Save
 } from '@mui/icons-material';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { GetOrganizationById } from '../../libraries/Organization';
+import {
+  GetOrganizationById,
+  UpdateOrganization
+} from '../../libraries/Organization';
 import { CustomizedSnackbars } from '../../components/Common/Toast';
 import { SubscriptionLoader } from '../Subscription/Subscription';
 import OrganizationForm from './OrganizationForm';
 import ConfigEditor from './ConfigEditor';
 import CommonButton from '../../components/Common/Button';
-import PermissionsPage from './Permission'
+import PermissionsPage from './Permission';
 
 interface OrganizationRow {
   id: string;
@@ -48,6 +51,8 @@ function ViewOrganizationLoader({ navigate }: { navigate: (path: string) => void
   const [loading, setLoading] = useState(true);
   const [snackbar, setSnackbar] = useState<{ message: string; status: string } | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [editedConfig, setEditedConfig] = useState<string | null>(null);
+  const formRef = useRef<HTMLFormElement | null>(null);
 
   useEffect(() => {
     if (id) fetchOrganization(Number(id));
@@ -64,8 +69,31 @@ function ViewOrganizationLoader({ navigate }: { navigate: (path: string) => void
     }
   }
 
-  const handleSubmit = (data: any) => {
-    console.log('Updated data:', data);
+  const handleSubmit = async (formData: any) => {
+    if (!organization) return;
+
+    const updatedOrg = {
+      ...organization,
+      ...formData,
+      config: editedConfig ?? organization.config,
+    };
+
+    const { created_at, updated_at, id, ...rest } = updatedOrg;
+    const payload = {
+      ...rest,
+      organization_id: id,
+    };
+
+    try {
+      await UpdateOrganization(payload);
+      setOrganization(updatedOrg);
+      setSnackbar({ message: 'Organization updated successfully.', status: 'success' });
+      setIsEditMode(false);
+      setEditedConfig(null);
+    } catch (err) {
+      console.error('Update failed:', err);
+      setSnackbar({ message: 'Failed to update organization.', status: 'error' });
+    }
   };
 
   return (
@@ -79,13 +107,8 @@ function ViewOrganizationLoader({ navigate }: { navigate: (path: string) => void
         />
       )}
 
-      {/* Header */}
       <Box display="flex" alignItems="center" justifyContent="space-between" mb={2} width="100%">
-        <Typography
-          variant="h4"
-          fontWeight={600}
-          sx={{ textAlign: 'left', flexGrow: 1 }}
-        >
+        <Typography variant="h4" fontWeight={600} sx={{ textAlign: 'left', flexGrow: 1 }}>
           {organization?.name || 'Organization'}
         </Typography>
         <Box display="flex" gap={1}>
@@ -98,8 +121,8 @@ function ViewOrganizationLoader({ navigate }: { navigate: (path: string) => void
         </Box>
       </Box>
 
-      {/* Accordions */}
       <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 2 }}>
+       
         <Accordion sx={{ width: '100%' }}>
           <AccordionSummary expandIcon={<ExpandMore />}>
             <Typography fontWeight={600}>Info</Typography>
@@ -111,56 +134,81 @@ function ViewOrganizationLoader({ navigate }: { navigate: (path: string) => void
                   label="Save"
                   variant="contained"
                   startIcon={<Save />}
-                  onClick={handleSubmit}
+                  onClick={() => {
+                    if (formRef.current) {
+                      const formData = new FormData(formRef.current);
+                      const plain: any = Object.fromEntries(formData.entries());
+                      handleSubmit(plain);
+                    }
+                  }}
                 />
               )}
               <CommonButton
                 label={isEditMode ? 'Cancel' : 'Edit'}
                 variant="contained"
                 startIcon={isEditMode ? <Cancel /> : <Edit />}
-                onClick={() => setIsEditMode(!isEditMode)}
+                onClick={() => {
+                  setIsEditMode(!isEditMode);
+                  if (!isEditMode && organization) {
+                    setEditedConfig(organization.config);
+                  }
+                }}
               />
             </Box>
 
             {organization && (
-              <OrganizationForm
-                initialData={organization}
-                onSubmit={handleSubmit}
-                onCancel={() => setIsEditMode(false)}
-                columns={3}
-                buttonAtTop
-                includeConfig={false}
-                disabled={!isEditMode}
-              />
+              <form
+                id="org-form"
+                ref={formRef}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.currentTarget);
+                  const plain: any = Object.fromEntries(formData.entries());
+                  handleSubmit(plain);
+                }}
+              >
+                <OrganizationForm
+                  initialData={organization}
+                  onSubmit={handleSubmit}
+                  onCancel={() => setIsEditMode(false)}
+                  columns={3}
+                  buttonAtTop={false}
+                  includeConfig={false}
+                  disabled={!isEditMode}
+                />
+              </form>
             )}
           </AccordionDetails>
         </Accordion>
 
-        <Accordion  sx={{ width: '100%' }}>
+        <Accordion sx={{ width: '100%' }}>
           <AccordionSummary expandIcon={<ExpandMore />}>
             <Typography fontWeight={600}>Configuration</Typography>
           </AccordionSummary>
           <AccordionDetails>
             {organization && (
               <ConfigEditor
-                config={organization.config}
-                onConfigChange={(newConfig) =>
-                  setOrganization((prev: OrganizationRow | null) =>
-                    prev ? { ...prev, config: newConfig } : null
-                  )
-                }
-                editorMode={false}
+                config={editedConfig ?? organization.config}
+                onConfigChange={(newConfig) => setEditedConfig(newConfig)}
+                onSave={() => {
+                  if (formRef.current) {
+                    const formData = new FormData(formRef.current);
+                    const plain: any = Object.fromEntries(formData.entries());
+                    handleSubmit(plain);
+                  }
+                }}
+                editorMode={isEditMode}
                 alwaysEditMode={false}
                 cardSx={{
-                  border: 'none', // disables the default outlined border
-                  boxShadow: 'none' // remove shadow too if needed
+                  border: 'none',
+                  boxShadow: 'none'
                 }}
               />
             )}
           </AccordionDetails>
         </Accordion>
 
-        <Accordion  sx={{ width: '100%' }}>
+        <Accordion sx={{ width: '100%' }}>
           <AccordionSummary expandIcon={<ExpandMore />}>
             <Typography fontWeight={600}>Subscription</Typography>
           </AccordionSummary>
@@ -188,8 +236,7 @@ function ViewOrganizationLoader({ navigate }: { navigate: (path: string) => void
           </AccordionDetails>
         </Accordion>
 
-
-        <Accordion  sx={{ width: '100%' }}>
+        <Accordion sx={{ width: '100%' }}>
           <AccordionSummary expandIcon={<ExpandMore />}>
             <Typography fontWeight={600}>Usage</Typography>
           </AccordionSummary>
@@ -199,8 +246,10 @@ function ViewOrganizationLoader({ navigate }: { navigate: (path: string) => void
             </Typography>
           </AccordionDetails>
         </Accordion>
-      </Box>
 
+      </Box>
     </>
   );
 }
+
+export default ViewOrganizationLoader;

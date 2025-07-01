@@ -10,6 +10,7 @@ import { SxProps, Theme } from '@mui/material';
 interface ConfigEditorProps {
   config: string;
   onConfigChange: (newConfig: string) => void;
+  onSave?: () => void;
   editorMode?: boolean;
   alwaysEditMode?: boolean;
   editorWidth?: string;
@@ -21,6 +22,7 @@ interface ConfigEditorProps {
 const ConfigEditor: React.FC<ConfigEditorProps> = ({
   config,
   onConfigChange,
+  onSave,
   editorMode = false,
   alwaysEditMode = true,
   editorWidth = '100%',
@@ -59,7 +61,10 @@ const ConfigEditor: React.FC<ConfigEditorProps> = ({
                   label="Save"
                   variant="contained"
                   startIcon={<Save />}
-                  onClick={() => setIsConfigEditMode(false)}
+                  onClick={() => {
+                    setIsConfigEditMode(false);
+                    onSave?.(); // trigger parent submit
+                  }}
                 />
                 <CommonButton
                   label="Cancel"
@@ -97,7 +102,7 @@ const ConfigEditor: React.FC<ConfigEditorProps> = ({
             editorDidMount={(editor) => {
               editorRef.current = editor;
               editor.setSize('100%', editorHeight);
-            
+
               const wrapper = editor.getWrapperElement();
               wrapper.style.backgroundColor = '#f7f9fa';
               wrapper.style.fontSize = '14px';
@@ -106,24 +111,21 @@ const ConfigEditor: React.FC<ConfigEditorProps> = ({
               wrapper.style.padding = '0';
               wrapper.style.textAlign = 'left';
               wrapper.style.margin = '0';
-            
+
               const lines = wrapper.querySelector('.CodeMirror-lines') as HTMLElement;
               if (lines) {
                 lines.style.paddingLeft = '8px';
                 lines.style.margin = '0';
                 lines.style.textAlign = 'left';
               }
-            
-              // Style the gutter container
+
               const gutterContainer = wrapper.querySelector('.CodeMirror-gutters') as HTMLElement;
               if (gutterContainer) {
                 gutterContainer.style.background = 'transparent';
-                gutterContainer.style.borderRight = '1px solid #ddd'; // subtle separator
-                // gutterContainer.style.paddingLeft = '4px';
+                gutterContainer.style.borderRight = '1px solid #ddd';
                 gutterContainer.style.paddingRight = '20px';
               }
 
-              // Style individual line numbers
               const gutters = wrapper.querySelectorAll('.CodeMirror-linenumber');
               gutters.forEach((gutter: Element) => {
                 const el = gutter as HTMLElement;
@@ -131,9 +133,9 @@ const ConfigEditor: React.FC<ConfigEditorProps> = ({
                 el.style.width = '100%';
                 el.style.textAlign = 'center';
               });
-            
+
               setTimeout(() => editor.refresh(), 0);
-            }}            
+            }}
           />
         </Box>
       </CardContent>

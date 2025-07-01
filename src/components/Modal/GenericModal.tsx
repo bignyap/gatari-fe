@@ -64,9 +64,7 @@ const GenericModal: React.FC<GenericModalProps> = ({
             mb: 3,
             ml: -1,
             fontSize: '1.05rem',
-            borderLeft: '4px solid #00897b',
             pl: 1.5,
-            color: '#004d40',
           }}
         >
           {title}
@@ -88,20 +86,11 @@ const GenericModal: React.FC<GenericModalProps> = ({
               type="button"
               onClick={onClose}
               variant="outlined"
-              sx={{
-                minWidth: 100,
-                borderColor: '#00897b',
-                color: '#00897b',
-                '&:hover': {
-                  backgroundColor: 'rgba(0, 137, 123, 0.08)',
-                },
-              }}
             />
             <CommonButton
               label="Create"
               type="submit"
-              variant="contained"
-              useTeal
+              variant="outlined"
               sx={{ minWidth: 100 }}
             />
           </Box>
