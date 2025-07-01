@@ -13,20 +13,11 @@ async function headerWithToken(
   headers: Record<string, string> = {}, 
   includeDefaultHeader: boolean = true
 ): Promise<Record<string, string>> {
-  return defaultHeaders
-  // const loggedIn = await UserService.isLoggedIn()
-  // // Check if user is logged in and add token to headers if available
-  // if (loggedIn) {
-  //   const token = UserService.getToken();
-  //   if (includeDefaultHeader) {
-  //     return { ...defaultHeaders, ...headers, 'Authorization': `Bearer ${token}` };
-  //   } else {
-  //     return { ...headers, 'Authorization': `Bearer ${token}` };
-  //   }
-  // } else {
-  //   await UserService._kc.login();
-  // }
+  return includeDefaultHeader
+    ? { ...defaultHeaders, ...headers }
+    : { ...headers };
 }
+
 
 export async function PostData(
   url: string, 
@@ -56,20 +47,43 @@ export async function PostData(
 }
 
 export async function PutData(
-  url: string, 
-  data: Record<string, any> = {}, 
-  headers: Record<string, string> = {}, 
+  url: string,
+  data: Record<string, any> = {},
+  headers: Record<string, string> = {},
   includeDefaultHeader: boolean = true
 ): Promise<any> {
   const reqHeaders = await headerWithToken(headers, includeDefaultHeader);
+  const contentType = reqHeaders['Content-Type'] || 'application/json';
+
+  let body: BodyInit;
+
+  if (
+    contentType === 'application/json' &&
+    (Array.isArray(data) || (typeof data === 'object' && !(data instanceof FormData)))
+  ) {
+    body = JSON.stringify(data);
+  } else if (contentType === 'application/x-www-form-urlencoded' && typeof data === 'object') {
+    body = new URLSearchParams(data as Record<string, string>);
+  } else if (
+    data instanceof FormData ||
+    typeof data === 'string' ||
+    data instanceof Blob ||
+    data instanceof URLSearchParams
+  ) {
+    body = data;
+  } else {
+    throw new Error('Invalid data type for BodyInit');
+  }
+
   const requestOptions: RequestInit = {
     method: 'PUT',
     headers: reqHeaders,
     mode: "cors",
     cache: "no-cache",
     referrerPolicy: "no-referrer",
-    body: new URLSearchParams(data) // Always use URLSearchParams for form data
+    body,
   };
+
   try {
     const response = await fetch(url, requestOptions);
     if (!response.ok) {
@@ -78,7 +92,7 @@ export async function PutData(
     return response.json();
   } catch (error) {
     console.error('There was a problem with the fetch operation:', error);
-    throw error; // Propagate the error
+    throw error;
   }
 }
 

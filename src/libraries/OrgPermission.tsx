@@ -1,5 +1,6 @@
 import {
-    PostData, DeleteData, GetData, BuildUrl
+    PostData, DeleteData, GetData, BuildUrl,
+    PutData
  } from './Utils';
  import { getApiBaseUrl, API_PATHS } from './Paths';
 
@@ -12,6 +13,10 @@ export async function CreateOrgPermission(data: Record<string, any>): Promise<an
   return PostData(getOrgPermissionUrl(), data);
 }
 
+export async function UpdateOrgPermission(orgId: number, data: Record<string, any>): Promise<any> {
+  return PutData(`${getOrgPermissionUrl()}/${orgId}`, data, { 'Content-Type': 'application/json' }, false);
+}
+
 export async function ListOrgPermission(orgId: number, pageNumber: number, itemsPerPage: number): Promise<any[]> {
   const queryParams = {
     page_number: pageNumber.toString(),
@@ -19,9 +24,10 @@ export async function ListOrgPermission(orgId: number, pageNumber: number, items
   };
 
   const response = await GetData(`${getOrgPermissionUrl()}/${orgId}`, queryParams);
-  const orgPermissions = response?.data ?? [];
-
-  return orgPermissions.map((orgPermission: any) => createOrgPermissionData(orgPermission));
+  if (!Array.isArray(response)) {
+    return [];
+  }
+  return response.map((orgPermission: any) => createOrgPermissionData(orgPermission));
 }
 
 export async function DeleteOrgPermission(id: string): Promise<void> {

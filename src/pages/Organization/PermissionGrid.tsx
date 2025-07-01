@@ -12,7 +12,7 @@ import {
   TableRow,
   CircularProgress,
 } from '@mui/material';
-import { ListOrgPermission } from '../../libraries/OrgPermission';
+import { ListOrgPermission, UpdateOrgPermission } from '../../libraries/OrgPermission';
 import { ListResourceTypes } from '../../libraries/ResourceType';
 import CommonButton from '../../components/Common/Button';
 import { Save, Cancel, Edit } from '@mui/icons-material';
@@ -87,7 +87,7 @@ const PermissionGrid: React.FC<{ organizationId: number }> = ({ organizationId }
     try {
       const allPermissions = await ListOrgPermission(organizationId, 1, 100);
       const resources = await ListResourceTypes(1, 100);
-      setOrgPermissions(allPermissions ?? [])
+      setOrgPermissions(Array.isArray(allPermissions) ? allPermissions : [])
       setResourceTypes(resources);
       setEditedPermissions(
         new Set(allPermissions.map((p: any) => `${p.resourceTypeId}-${p.permissionCode}`))
@@ -116,8 +116,11 @@ const PermissionGrid: React.FC<{ organizationId: number }> = ({ organizationId }
   };
 
   const handleSave = () => {
-    console.log('Final permissions to save:', Array.from(editedPermissions));
-    // TODO: Call CreateOrgPermission/DeleteOrgPermission accordingly
+    UpdateOrgPermission(organizationId, Array.from(editedPermissions).map((key) => {
+        const [resourceTypeId, permissionCode] = key.split('-');
+        return { "resource_type_id": Number(resourceTypeId), "permission_code": permissionCode };
+      }),
+    );    
     setIsEditMode(false);
   };
 
