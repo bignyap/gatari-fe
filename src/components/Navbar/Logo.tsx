@@ -2,19 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import SvgIcon from '@mui/material/SvgIcon';
 
 interface LogoProps {
   title: string;
   onClick: () => void;
 }
-
-// Placeholder icon (rounded square) — replace with your own if desired
-const BrandIcon = () => (
-  <SvgIcon sx={{ fontSize: 24 }}>
-    <rect x="4" y="4" width="16" height="16" rx="4" fill="currentColor" />
-  </SvgIcon>
-);
 
 const Logo: React.FC<LogoProps> = ({ title, onClick }) => (
   <Box
@@ -38,16 +30,30 @@ const Logo: React.FC<LogoProps> = ({ title, onClick }) => (
       },
     }}
   >
-    <BrandIcon />
+    <img
+      src="/logo.png" // Ensure this points to your PNG in the `public/` folder
+      alt="Logo"
+      style={{
+        width: 32, // adjust size as needed
+        height: 32,
+        objectFit: 'contain',
+        borderRadius: 4,
+        backgroundColor: 'transparent',
+      }}
+    />
     <Typography
       variant="h5"
       sx={{
-        fontFamily: 'Inter, Roboto, system-ui, sans-serif',
-        fontWeight: 700,
-        fontSize: { xs: '1rem', sm: '1.25rem' },
-        letterSpacing: '0.03rem',
-        lineHeight: 1.2,
-        color: 'inherit',
+        fontFamily: `'Poppins', 'Inter', sans-serif`,
+        fontWeight: 600,
+        fontSize: { xs: '1.2rem', sm: '1.4rem' },
+        letterSpacing: '0.04em',
+        lineHeight: 1.3,
+        background: 'linear-gradient(90deg, #5bc0be, #cfeafe)',
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        textShadow: '0 1px 1px rgba(0, 0, 0, 0.15)',
+        textTransform: 'capitalize',
       }}
     >
       {title}
