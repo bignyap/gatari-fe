@@ -21,7 +21,26 @@ export async function ListResourceTypes(pageNumber: number, itemsPerPage: number
     const endpoints = await GetData(getResourceTypeUrl(), queryParams);
     
     return endpoints.map((endpoint: any) => createResourceTypeData(endpoint));
-  }
+}
+
+export async function ListAllResourceTypes(): Promise<any> {
+  let allEndpoints: any[] = [];
+  let currentPage = 1;
+  const itemsPerPage = 100;
+  let fetchedItems: any[];
+
+  do {
+      const queryParams = {
+          page_number: currentPage.toString(),
+          items_per_page: itemsPerPage.toString()
+      };
+      fetchedItems = await GetData(getResourceTypeUrl(), queryParams);
+      allEndpoints = allEndpoints.concat(fetchedItems.map((org: any) => createResourceTypeData(org)));
+      currentPage++;
+  } while (fetchedItems.length === itemsPerPage);
+
+  return allEndpoints;
+}
 
 export async function DeleteResourceType(id: string): Promise<void> {
   await DeleteData(`${getResourceTypeUrl()}/${id}`);

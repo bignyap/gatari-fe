@@ -1,89 +1,102 @@
 import { useEffect, useState } from 'react';
 import { ListEndpoints } from '../../../libraries/Endpoint';
 import CircularProgress from '@mui/material/CircularProgress';
-import { EnhancedTable } from '../../../components/Table/Table'
+import { EnhancedTable } from '../../../components/Table/Table';
 import { HeadCell } from '../../../components/Table/Utils';
 import AddIcon from '@mui/icons-material/Add';
 import { CustomizedSnackbars } from '../../../components/Common/Toast';
 import EndpointModal from './EndpointModal';
 import CommonButton from '../../../components/Common/Button';
-import { Box } from '@mui/material';
-import { TextField, InputAdornment }  from '@mui/material'; 
+import { Box, TextField, InputAdornment } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 
 export function EndpointTab() {
-    return (
-      <div>
-        <EndpointLoader />
-      </div>
-    );
-  }
+  return (
+    <div>
+      <EndpointLoader />
+    </div>
+  );
+}
 
 export function EndpointLoader() {
-    const [endpoints, setEndpoints] = useState<any[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [snackbar, setSnackbar] = useState<{ message: string, status: string } | null>(null);
-  
-    async function fetchEndoints() {
-      try {
-        const endpointData = await ListEndpoints(1, 10);
-        setEndpoints(endpointData);
-      } catch (error) {
-        console.error("Error fetching endpoints:", error);
-        setEndpoints([]);
-        setSnackbar({
-          message: "Failed to load endpoints. Please try again later.",
-          status: "error"
-        });
-      } finally {
-        setLoading(false);
-      }
+  const [endpoints, setEndpoints] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [snackbar, setSnackbar] = useState<{ message: string; status: string } | null>(null);
+  const [page, setPage] = useState<number>(0);
+  const [rowsPerPage, setRowsPerPage] = useState<number>(10);
+
+  const fetchEndpoints = async (pageNumber: number, limit: number) => {
+    setLoading(true);
+    try {
+      const endpointData = await ListEndpoints(pageNumber + 1, limit); // +1 if backend is 1-indexed
+      setEndpoints(endpointData);
+    } catch (error) {
+      console.error('Error fetching endpoints:', error);
+      setSnackbar({
+        message: 'Failed to load endpoints. Please try again later.',
+        status: 'error',
+      });
+    } finally {
+      setLoading(false);
     }
-  
-    useEffect(() => {
-      fetchEndoints();
-    }, []);
-  
-    if (loading) {
-      return (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+  };
+
+  useEffect(() => {
+    fetchEndpoints(page, rowsPerPage);
+  }, [page, rowsPerPage]);
+
+  const handleCreateEndpoint = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleEndpointCreated = (newEndpoint: any) => {
+    setEndpoints((prev) => [...prev, {
+      id: newEndpoint.id,
+      name: newEndpoint.name,
+      description: newEndpoint.description,
+      httpMethod: newEndpoint.http_method,
+      pathTemplate: newEndpoint.path_template,
+      resourceTypeId: newEndpoint.resource_type_id,
+      resourceTypeName: newEndpoint.resource_type_name,
+    }]);
+  };
+
+  return (
+    <div>
+      {snackbar && (
+        <CustomizedSnackbars
+          message={snackbar.message}
+          status={snackbar.status}
+          open
+          onClose={() => setSnackbar(null)}
+        />
+      )}
+      {loading ? (
+        <Box display="flex" justifyContent="center" alignItems="center" height="100%">
           <CircularProgress />
-        </div>
-      );
-    }
-  
-    const handleCreateEndpoint = async () => {
-      setIsModalOpen(true);
-    };
-  
-    const handleEndpointCreated = (newEndpoint: any) => {
-      setEndpoints([...endpoints, newEndpoint]);
-    };
-  
-    return (
-      <div>
-        {snackbar && (
-          <CustomizedSnackbars
-            message={snackbar.message}
-            status={snackbar.status}
-            open={true} // Ensure the snackbar opens automatically
-            onClose={() => setSnackbar(null)}
-          />
-        )}
+        </Box>
+      ) : (
         <EnhancedTable
           rows={endpoints}
           headCells={headCells}
           defaultSort="id"
-          defaultRows={1}
+          defaultRows={rowsPerPage}
           stickyColumnIds={[]}
-          tableContainerSx= {{
+          tableContainerSx={{
             maxHeight: '50vh',
             overflowX: 'auto',
-            overflowY: 'auto'
+            overflowY: 'auto',
           }}
           title={
-            <Box sx={{ display: 'flex', gap: '10px', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box
+              sx={{
+                display: 'flex',
+                gap: '10px',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
               <TextField
                 variant="outlined"
                 placeholder="Search..."
@@ -96,7 +109,6 @@ export function EndpointLoader() {
                     </InputAdornment>
                   ),
                 }}
-                // Add onChange handler if needed
               />
               <CommonButton
                 label="CREATE ENDPOINT"
@@ -109,25 +121,29 @@ export function EndpointLoader() {
               />
             </Box>
           }
-          page={0}
-          count={-1}
-          onPageChange={(newPage) => {
-          }}
-          onRowsPerPageChange={(event) => {
+          page={page}
+          count={-1} // Set actual count if available
+          onPageChange={(newPage) => setPage(newPage)}
+          onRowsPerPageChange={(newRowsPerPage: number) => {
+            setRowsPerPage(newRowsPerPage);
+            setPage(0);
           }}
         />
-        {isModalOpen && (
-          <EndpointModal
-            onClose={() => setIsModalOpen(false)}
-            onEndpointCreated={handleEndpointCreated}
-          />
-        )}
-      </div>
-    );
-  }
-  
-  const headCells: HeadCell[] = [
-    { id: 'id', label: 'ID' },
-    { id: 'name', label: 'Name' },
-    { id: 'description', label: 'Description' },
-  ];
+      )}
+      {isModalOpen && (
+        <EndpointModal
+          onClose={() => setIsModalOpen(false)}
+          onEndpointCreated={handleEndpointCreated}
+        />
+      )}
+    </div>
+  );
+}
+
+const headCells: HeadCell[] = [
+  { id: 'name', label: 'Name' },
+  { id: 'description', label: 'Description' },
+  { id: 'httpMethod', label: 'HTTP Method' },
+  { id: 'pathTemplate', label: 'Path Template' },
+  { id: 'resourceTypeName', label: 'Resource Type' },
+];

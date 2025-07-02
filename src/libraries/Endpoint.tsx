@@ -50,11 +50,15 @@ export async function ListAllEndpoints(): Promise<any> {
   return allEndpoints;
 }
 
-function createEndpointData(org: any): EndpointData {
+function createEndpointData(endpoint: any): EndpointData {
     return {
-      id: org.id,
-      name: org.name,
-      description: org.created_at,
+      id: endpoint.id,
+      name: endpoint.name,
+      description: endpoint.description,
+      httpMethod: endpoint.http_method,
+      pathTemplate: endpoint.path_template,
+      resourceTypeId: endpoint.resource_type_id,
+      resourceTypeName: endpoint.resource_type_name,
     };
 }
 
@@ -62,5 +66,9 @@ interface EndpointData {
     id: number;
     name: string;
     description: string;
+    httpMethod: string;
+    pathTemplate: string;
+    resourceTypeId: number;
+    resourceTypeName: string;
     [key: string]: any;
 }
