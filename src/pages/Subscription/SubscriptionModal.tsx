@@ -51,7 +51,7 @@ const SubscriptionModal: React.FC<SubscriptionFormProps> = ({
     status: safeInitialData.status ?? true,
     organization_id: orgId,
     subscription_tier_id: safeInitialData.subscription_tier_id ?? 0,
-    billing_interval: safeInitialData.billing_interval ?? 'monthly',
+    billing_interval: safeInitialData.billing_interval ?? 'once',
     billing_model: safeInitialData.billing_model ?? 'usage',
     quota_reset_interval: safeInitialData.quota_reset_interval ?? 'monthly',
   });
