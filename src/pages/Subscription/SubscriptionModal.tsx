@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CreateSubscription } from '../../libraries/Subscription';
+import { CreateSubscription, UpdateSubscription } from '../../libraries/Subscription';
 import { ListAllSubscriptionTiers } from '../../libraries/SubscriptionTier';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
@@ -12,84 +12,94 @@ import { CustomizedSnackbars } from '../../components/Common/Toast';
 import CommonButton from '../../components/Common/Button';
 
 interface SubscriptionFormProps {
-    onClose: () => void;
-    onSubscriptionCreated: (org: any) => void;
-    orgId: number;
-    subInitName?: string
-  }
-
-interface SubTiers {
-    id: number;
-    name: string;
+  onClose: () => void;
+  onSubscriptionCreated: (sub: any) => void;
+  orgId: number;
+  subInitName?: string;
+  editMode?: boolean;
+  initialData?: Record<string, any> | null;
 }
 
-const SubscriptionModal: React.FC<SubscriptionFormProps> = ({ onClose, onSubscriptionCreated, orgId, subInitName = '' }) => {
-    const [formData, setFormData] = useState({
-        name: subInitName,
-        type: '',
-        start_date: new Date().toISOString().split('T')[0],
-        api_limit: 0,
-        expiry_date: '',
-        description: null,
-        status: true,
-        organization_id: orgId,
-        subscription_tier_id: 0
+interface SubTiers {
+  id: number;
+  name: string;
+}
+
+function formatDate(value: string | number | Date | null | undefined): string {
+  if (!value) return '';
+  const date = typeof value === 'number' ? new Date(value * 1000) : new Date(value);
+  return date.toISOString().split('T')[0];
+}
+
+const SubscriptionModal: React.FC<SubscriptionFormProps> = ({
+  onClose,
+  onSubscriptionCreated,
+  orgId,
+  subInitName = '',
+  editMode = false,
+  initialData = null
+}) => {
+  const safeInitialData = initialData ?? {};
+
+  const [formData, setFormData] = useState({
+    name: safeInitialData.name ?? subInitName,
+    type: safeInitialData.type ?? '',
+    start_date: formatDate(safeInitialData.start_date),
+    api_limit: safeInitialData.api_limit ?? 0,
+    expiry_date: formatDate(safeInitialData.expiry_date),
+    description: safeInitialData.description ?? '',
+    status: safeInitialData.status ?? true,
+    organization_id: orgId,
+    subscription_tier_id: safeInitialData.subscription_tier_id ?? 0,
+    billing_interval: safeInitialData.billing_interval ?? 'monthly',
+    billing_model: safeInitialData.billing_model ?? 'usage',
+    quota_reset_interval: safeInitialData.quota_reset_interval ?? 'monthly',
+  });
+  
+
+  const [subTiers, setSubTiers] = useState<SubTiers[]>([]);
+  const [snackbar, setSnackbar] = useState<{ message: string; status: string } | null>(null);
+
+  useEffect(() => {
+    ListAllSubscriptionTiers()
+      .then(setSubTiers)
+      .catch(() =>
+        setSnackbar({ message: 'Failed to load subscription tiers.', status: 'error' })
+      );
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value, type, checked } = e.target as HTMLInputElement;
+    setFormData({
+      ...formData,
+      [name]: type === 'checkbox' ? checked : name === 'api_limit' ? Math.max(0, Number(value)) : value,
     });
+  };
 
-    const [subTiers, setSubTiers] = useState<SubTiers[]>([]);
-    const [snackbar, setSnackbar] = useState<{ message: string; status: string } | null>(null);
-
-    async function fetchSubTiers() {
-      try {
-        const subTiers = await ListAllSubscriptionTiers();
-        setSubTiers(subTiers);
-      } catch (error) {
-        console.error("Error fetching subscription tiers:", error);
-        setSubTiers([]);
-        setSnackbar({
-          message: "Failed to load subscription tiers. Please try again later.",
-          status: "error"
-        });
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      let result;
+      if (editMode && safeInitialData?.id) {
+        result = await UpdateSubscription(safeInitialData.id, formData);
+      } else {
+        result = await CreateSubscription(formData);
       }
-    };
 
-    useEffect(() => {
-        fetchSubTiers();
-      },
-    [])
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const target = e.target;
-        const { name, value, type, checked } = target as HTMLInputElement;
-        if (name === 'api_limit' && Number(value) < 0) {
-          setFormData({
-            ...formData,
-            api_limit: 0
-          })
-        }
-        setFormData({
-          ...formData,
-          [name]: type === 'checkbox' ? checked : value,
-        });
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-          const newSub = await CreateSubscription(formData);
-          console.log("subscription created", newSub);
-          onSubscriptionCreated(newSub);
-          onClose();
-          <CustomizedSnackbars
-              message={`Subscription ${newSub.name} created successfully!`}
-              status="success"
-              onClose={() => {}}
-              open={true}
-          />
-        } catch (error) {
-        console.error('Error creating subscription:', error);
-        }
-    };
+      onSubscriptionCreated(result);
+      onClose();
+      setSnackbar({
+        message: `Subscription ${editMode ? 'updated' : 'created'} successfully!`,
+        status: 'success',
+      });
+    } catch (error) {
+      console.error('Error submitting subscription:', error);
+      setSnackbar({
+        message: `Failed to ${editMode ? 'update' : 'create'} subscription.`,
+        status: 'error',
+      });
+    }
+  };
 
   return (
     <>
@@ -117,111 +127,143 @@ const SubscriptionModal: React.FC<SubscriptionFormProps> = ({ onClose, onSubscri
             overflowY: 'auto',
           }}
         >
-          {/* <Typography variant="h6" component="h2" sx={{ mb: 2 }}>
-            Create Subscription
-          </Typography> */}
           <form onSubmit={handleSubmit}>
-              <TextField
-                  fullWidth
-                  margin="normal"
-                  name="name"
-                  label="Name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-              />
-              <TextField
-                  fullWidth
-                  margin="normal"
-                  name="type"
-                  label="Type"
-                  value={formData.type}
-                  onChange={handleChange}
-                  required
-              />
-              <TextField
-                  fullWidth
-                  margin="normal"
-                  name="start_date"
-                  label="Start Date"
-                  type="date"
-                  value={formData.start_date}
-                  onChange={handleChange}
-                  InputLabelProps={{ shrink: true }}
-                  required
-              />
-              <TextField
-                  fullWidth
-                  margin="normal"
-                  name="api_limit"
-                  label="API Limit"
-                  type="number"
-                  value={formData.api_limit}
-                  onChange={handleChange}
-                  required
-              />
-              <TextField
-                  fullWidth
-                  margin="normal"
-                  name="expiry_date"
-                  label="Expiry Date"
-                  type="date"
-                  value={formData.expiry_date}
-                  onChange={handleChange}
-                  InputLabelProps={{ shrink: true }}
-                  required
-              />
-              <FormControl 
-                  fullWidth
-                  margin="normal"
+            <TextField
+              fullWidth
+              margin="normal"
+              name="name"
+              label="Name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+            />
+            <TextField
+              fullWidth
+              margin="normal"
+              name="type"
+              label="Type"
+              value={formData.type}
+              onChange={handleChange}
+              required
+            />
+            <TextField
+              fullWidth
+              margin="normal"
+              name="start_date"
+              label="Start Date"
+              type="date"
+              value={formData.start_date}
+              onChange={handleChange}
+              InputLabelProps={{ shrink: true }}
+              required
+            />
+            <TextField
+              fullWidth
+              margin="normal"
+              name="api_limit"
+              label="API Limit"
+              type="number"
+              value={formData.api_limit}
+              onChange={handleChange}
+              required
+            />
+            <TextField
+              fullWidth
+              margin="normal"
+              name="expiry_date"
+              label="Expiry Date"
+              type="date"
+              value={formData.expiry_date}
+              onChange={handleChange}
+              InputLabelProps={{ shrink: true }}
+              required
+            />
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Status</InputLabel>
+              <Select
+                name="status"
+                value={formData.status ? 'true' : 'false'}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value === 'true' })}
+                label="Status"
               >
-                  <InputLabel>Status</InputLabel>
-                  <Select
-                      name="status"
-                      value={formData.status ? 'true' : 'false'}
-                      onChange={(e) => setFormData({ ...formData, status: e.target.value === 'true' })}
-                      label="Status"
-                  >
-                      <MenuItem value="true">Active</MenuItem>
-                      <MenuItem value="false">Inactive</MenuItem>
-                  </Select>
-              </FormControl>
-              <FormControl fullWidth margin="normal">
-                  <InputLabel>Subscription Tier</InputLabel>
-                  <Select
-                      name="subscription_tier_id"
-                      value={formData.subscription_tier_id}
-                      onChange={(e) => setFormData({ ...formData, subscription_tier_id: Number(e.target.value) })}
-                      label="Subscription Tier"
-                      required
-                  >
-                      {subTiers.map((subTier) => (
-                          <MenuItem key={subTier.id} value={subTier.id}>
-                              {subTier.name}
-                          </MenuItem>
-                      ))}
-                  </Select>
-              </FormControl>
-              <TextField
-                  fullWidth
-                  margin="normal"
-                  name="description"
-                  label="Description"
-                  value={formData.description}
-                  onChange={handleChange}
-              />
+                <MenuItem value="true">Active</MenuItem>
+                <MenuItem value="false">Inactive</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Subscription Tier</InputLabel>
+              <Select
+                name="subscription_tier_id"
+                value={formData.subscription_tier_id}
+                onChange={(e) => setFormData({ ...formData, subscription_tier_id: Number(e.target.value) })}
+                label="Subscription Tier"
+                required
+              >
+                {subTiers.map((tier) => (
+                  <MenuItem key={tier.id} value={tier.id}>
+                    {tier.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Billing Interval</InputLabel>
+              <Select
+                name="billing_interval"
+                value={formData.billing_interval}
+                onChange={(e) => setFormData({ ...formData, billing_interval: e.target.value })}
+                required
+              >
+                <MenuItem value="monthly">Monthly</MenuItem>
+                <MenuItem value="yearly">Yearly</MenuItem>
+                <MenuItem value="once">Once</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Billing Model</InputLabel>
+              <Select
+                name="billing_model"
+                value={formData.billing_model}
+                onChange={(e) => setFormData({ ...formData, billing_model: e.target.value })}
+                required
+              >
+                <MenuItem value="flat">Flat</MenuItem>
+                <MenuItem value="usage">Usage</MenuItem>
+                <MenuItem value="hybrid">Hybrid</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Quota Reset Interval</InputLabel>
+              <Select
+                name="quota_reset_interval"
+                value={formData.quota_reset_interval}
+                onChange={(e) => setFormData({ ...formData, quota_reset_interval: e.target.value })}
+                required
+              >
+                <MenuItem value="monthly">Monthly</MenuItem>
+                <MenuItem value="yearly">Yearly</MenuItem>
+                <MenuItem value="total">Total</MenuItem>
+              </Select>
+            </FormControl>
+            <TextField
+              fullWidth
+              margin="normal"
+              name="description"
+              label="Description"
+              value={formData.description}
+              onChange={handleChange}
+            />
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-              <CommonButton 
-                  label='Create'
-                  type="submit" 
-                  variant="contained" 
-                  onClick={handleSubmit} 
-             />
-              <CommonButton 
-                  label='Cancel'
-                  type="button" 
-                  onClick={onClose} 
-                  variant="outlined" 
+              <CommonButton
+                label={editMode ? 'Update' : 'Create'}
+                type="submit"
+                variant="contained"
+              />
+              <CommonButton
+                label="Cancel"
+                type="button"
+                variant="outlined"
+                onClick={onClose}
               />
             </Box>
           </form>
