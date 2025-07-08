@@ -6,7 +6,7 @@ import Logo from './Logo';
 import MobileMenu from './MobileMenu';
 import DesktopMenu from './DesktopMenu';
 
-import '../../styles/main.css';
+import '../../App.css';
 
 const pages = [
   { name: 'Organizations', link: '/organizations' },
@@ -133,8 +133,7 @@ export default function Navbar({ title }: NavbarProps) {
           width: '100%',
         }}
       >
-        <Container
-          maxWidth="lg"
+        <Box
           sx={{
             display: 'flex',
             flexDirection: 'column',
@@ -143,11 +142,11 @@ export default function Navbar({ title }: NavbarProps) {
             flexGrow: 1,
             mx: 'auto',
             px: { xs: 2, sm: 3 },
-            minHeight: 'calc(100vh - 64px)',
+            minHeight: 'calc(100vh - 64px)', // or just height: '100%'
           }}
         >
           <Outlet />
-        </Container>
+        </Box>
       </Box>
     </Box>
   );

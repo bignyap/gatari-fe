@@ -15,7 +15,7 @@ export interface EnhancedTableProps {
   rows: Data[];
   headCells: readonly HeadCell[];
   defaultSort: string;
-  title: React.ReactNode;
+  title?: React.ReactNode;
   defaultRows: number;
   stickyColumnIds: string[];
   page: number;
@@ -76,9 +76,11 @@ export const EnhancedTable: React.FC<EnhancedTableProps & { renderCell?: (key: s
       }}
     >
       <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-        <Box sx={{ mb: 1.5 }}>
-          <EnhancedTableToolbar title={title} />
-        </Box>
+        {title && (
+          <Box sx={{ mb: 1.5 }}>
+            <EnhancedTableToolbar title={title} />
+          </Box>
+        )}
         <TableContainer
           sx={tableContainerSx || {
             maxHeight: '70vh',

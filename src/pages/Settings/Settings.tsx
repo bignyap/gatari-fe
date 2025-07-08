@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router-dom';
-import '../../styles/main.css';
+import '../../App.css';
 
 export function SettingsPage() {
   return (

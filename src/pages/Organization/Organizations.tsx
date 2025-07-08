@@ -5,7 +5,7 @@ import OrganizationModal from './OrganizationModal';
 import { EnhancedTable } from '../../components/Table/Table'
 import { HeadCell, FormatCellValue } from '../../components/Table/Utils';
 import SearchIcon from '@mui/icons-material/Search';
-import { TextField, InputAdornment }  from '@mui/material'; 
+import { TextField, InputAdornment, Box }  from '@mui/material'; 
 import { CustomizedSnackbars } from '../../components/Common/Toast';
 import CircularProgress from '@mui/material/CircularProgress';
 import OrgTypeModal from '../OrganizationType/OrgTypeModal';
@@ -14,7 +14,7 @@ import AddIcon from '@mui/icons-material/Add';
 
 export function OrganizationPage() {
   return (
-    <div className = 'container'>
+    <div className="container">
       <OrganizationLoader />
     </div>
   );
@@ -72,11 +72,20 @@ export function OrganizationLoader() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+      <Box
+        sx={{
+          height: '100%',
+          width: '100%',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
         <CircularProgress />
-      </div>
+      </Box>
     );
   }
+  
 
   const handleCreateOrganization = async () => {
     setIsModalOpen(true);
