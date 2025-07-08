@@ -1,5 +1,3 @@
-// src/pages/Usage/UsagePageLoader.tsx
-import { useEffect, useState } from "react";
 import {
   Accordion,
   AccordionSummary,
@@ -12,14 +10,14 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import dayjs from "dayjs";
 import { saveAs } from "file-saver";
-
-import { GetApiUsageSummary } from "../../libraries/ApiUsage";
 import { EnhancedTable } from "../../components/Table/Table";
 import { FormatCellValue, HeadCell } from "../../components/Table/Utils";
 import { CustomizedSnackbars } from "../../components/Common/Toast";
 import { UsageFilterState } from "./UsageFilter";
+import { useEffect, useState } from "react";
+import dayjs from "dayjs";
+import { GetApiUsageSummary } from "../../libraries/ApiUsage";
 
 export function UsagePageLoader({
   filters,
@@ -28,50 +26,21 @@ export function UsagePageLoader({
   filters: UsageFilterState;
   groupBy?: "organization_name" | "endpoint_name" | "month";
 }) {
-  const [groupedData, setGroupedData] = useState<Record<string, any[]>>({});
-  const [loading, setLoading] = useState(false);
+  const { data, loading, error } = UseApiUsageData(filters, {
+    groupBy,
+    page: 1,
+    itemsPerPage: 100,
+  });
+
+  // Group data by groupBy key
+  const groupedData: Record<string, any[]> = {};
+  for (const item of data) {
+    const key = item[groupBy] || "Ungrouped";
+    if (!groupedData[key]) groupedData[key] = [];
+    groupedData[key].push(item);
+  }
+
   const [snackbar, setSnackbar] = useState<{ message: string; status: string } | null>(null);
-
-  const handleSearch = async () => {
-    try {
-      setLoading(true);
-      const queryParams: Record<string, any> = {
-        group_by: true,
-        page_number: 1,
-        items_per_page: 100,
-      };
-
-      Object.entries(filters).forEach(([key, val]) => {
-        if (val) {
-          queryParams[key] =
-            key === "start_date" || key === "end_date" ? dayjs(val).unix() : Number(val);
-        }
-      });
-
-      const usage = await GetApiUsageSummary(queryParams);
-
-      const grouped: Record<string, any[]> = {};
-      for (const item of usage) {
-        const key = item[groupBy] || "Ungrouped";
-        if (!grouped[key]) grouped[key] = [];
-        grouped[key].push(item);
-      }
-
-      setGroupedData(grouped);
-    } catch (err) {
-      console.error("Error fetching usage data", err);
-      setSnackbar({
-        message: "Failed to fetch API usage data.",
-        status: "error",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    handleSearch();
-  }, [filters]);
 
   const exportToCSV = (rows: any[], fileName: string) => {
     const csvHeaders = usageHeadCells.map(h => `"${h.label}"`).join(",");
@@ -98,6 +67,10 @@ export function UsagePageLoader({
         <Box display="flex" justifyContent="center" py={6}>
           <CircularProgress />
         </Box>
+      ) : error ? (
+        <Typography variant="body1" textAlign="center" color="error">
+          {error}
+        </Typography>
       ) : Object.entries(groupedData).length === 0 ? (
         <Typography variant="body1" textAlign="center">
           No usage data found.
@@ -106,7 +79,7 @@ export function UsagePageLoader({
         Object.entries(groupedData).map(([group, rows]) => (
           <Accordion
             key={group}
-            defaultExpanded
+            // defaultExpanded
             sx={{
               width: "100%",
               marginBottom: 2,
@@ -152,3 +125,51 @@ const usageHeadCells: HeadCell[] = [
   { id: "total_calls", label: "Total Calls" },
   { id: "total_cost", label: "Total Cost" },
 ];
+
+export function GetNonEmptyFilters(filters: UsageFilterState): Partial<UsageFilterState> {
+  return Object.fromEntries(
+    Object.entries(filters).filter(([_, v]) => v !== "")
+  );
+}
+
+export function UseApiUsageData(
+  filters: UsageFilterState,
+  options?: { groupBy?: "organization_name" | "endpoint_name" | "month"; page?: number; itemsPerPage?: number }
+) {
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const queryParams: Record<string, any> = {
+          ...GetNonEmptyFilters(filters),
+        };
+        if (options?.groupBy) queryParams.group_by = true;
+        if (options?.page) queryParams.page_number = options.page;
+        if (options?.itemsPerPage) queryParams.items_per_page = options.itemsPerPage;
+
+        // Convert date fields to unix
+        Object.entries(queryParams).forEach(([key, val]) => {
+          if (key === "start_date" || key === "end_date") {
+            queryParams[key] = dayjs(val).unix();
+          }
+        });
+
+        const res = await GetApiUsageSummary(queryParams);
+        setData(res);
+      } catch (err) {
+        setError("Failed to fetch API usage data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(filters), options?.groupBy, options?.page, options?.itemsPerPage]);
+
+  return { data, loading, error };
+}

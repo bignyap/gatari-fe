@@ -17,25 +17,28 @@ import {
   Typography,
 } from "@mui/material";
 
-export default function UsagePlotByEndpointOrg({ res }: { res: any }) {
+export default function CallsPlotByEndpointOrg({ res }: { res: any }) {
   const [rawData, setRawData] = useState<any[]>([]);
   const [orgs, setOrgs] = useState<string[]>([]);
   const [visibleOrgs, setVisibleOrgs] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const load = async () => {
+
+      console.log("res:", res)
+
       const orgSet = new Set<string>();
       const endpointSet = new Set<string>();
       const dataMap: Record<string, Record<string, number>> = {};
 
-      res.forEach(({ endpoint_name, organization_name, total_cost }: any) => {
+      res.forEach(({ endpoint_name, organization_name, total_calls }: any) => {
         orgSet.add(organization_name);
         endpointSet.add(endpoint_name);
 
         if (!dataMap[endpoint_name]) {
           dataMap[endpoint_name] = {};
         }
-        dataMap[endpoint_name][organization_name] = total_cost;
+        dataMap[endpoint_name][organization_name] = total_calls;
       });
 
       const sortedEndpoints = Array.from(endpointSet).sort();
@@ -74,7 +77,7 @@ export default function UsagePlotByEndpointOrg({ res }: { res: any }) {
   };
 
   return (
-    <PlotCard title="API Cost by Endpoint & Organization" height={400}>
+    <PlotCard title="Total Calls by Endpoint & Organization" height={400}>
       <Box sx={{ display: "flex", width: "100%" }}>
         {/* Org Column with "Overall" */}
         <Box sx={{ minWidth: 220, pr: 2, borderRight: "1px solid #ccc" }}>

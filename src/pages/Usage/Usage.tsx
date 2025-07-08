@@ -1,4 +1,3 @@
-// src/pages/Usage/UsagePage.tsx
 import { useState } from "react";
 import {
   Box,
@@ -13,7 +12,9 @@ import InsertChartIcon from "@mui/icons-material/InsertChart";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import UsageFilter, { UsageFilterState } from "./UsageFilter";
 import UsagePlots from "./UsagePlots";
-import { UsagePageLoader } from "./UsagePageLoader";
+import { 
+  UseApiUsageData, GetNonEmptyFilters, UsagePageLoader 
+} from "./UsagePageLoader";
 
 export function UsagePage() {
   const [filters, setFilters] = useState<UsageFilterState>({
@@ -28,6 +29,9 @@ export function UsagePage() {
   const theme = useTheme();
 
   const sidebarWidth = sidebarOpen ? 300 : 60;
+
+  // Fetch ungrouped data for plots
+  const { data: usageData, loading } = UseApiUsageData(filters);
 
   const viewToggle = (
     <Tooltip title={showTable ? "View Graphs" : "View Table"}>
@@ -45,6 +49,8 @@ export function UsagePage() {
       </IconButton>
     </Tooltip>
   );
+
+  if (loading) return <div>Loading...</div>;
 
   return (
     <>
@@ -92,7 +98,7 @@ export function UsagePage() {
           {showTable ? (
             <UsagePageLoader filters={filters} groupBy="organization_name" />
           ) : (
-            <UsagePlots filters={filters} />
+            <UsagePlots res={usageData} filters={GetNonEmptyFilters(filters)} />
           )}
         </Container>
       </Box>

@@ -42,7 +42,11 @@ interface OrganizationRow {
 
 export function ViewOrganizationPage() {
   const navigate = useNavigate();
-  return <ViewOrganizationLoader navigate={navigate} />;
+  return (
+    <Box sx={{ pt: 4 }}>
+      <ViewOrganizationLoader navigate={navigate} />
+    </Box>
+  );
 }
 
 function ViewOrganizationLoader({ navigate }: { navigate: (path: string) => void }) {

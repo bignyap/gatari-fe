@@ -1,27 +1,27 @@
 // src/pages/Usage/UsagePlots.tsx
 import { Box, Grid } from "@mui/material";
 import UsagePlotByEndpointOrg from "./UsagePlotByEndpointOrg";
-import UsageOverallEndpointPlot from "./UsageOverallEndpointPlot";
 import UsageMonthlyPlot from "./UsageMonthlyPlot";
+import UsageCostPerCallPlot from "./UsageCostPercall";
+import CallsPlotByEndpointOrg from "./CallsByEndpointOrg"
 
-export default function UsagePlots({
-  filters,
-}: {
-  filters: any;
-}) {
+export default function UsagePlots({ res, filters }: { filters:any, res: any }) {
   return (
     <Box sx={{ width: "100%" }}>
       <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          <UsagePlotByEndpointOrg filters={filters} />
+        <Grid item xs={12}>
+          <UsagePlotByEndpointOrg res={res} />
         </Grid>
-        <Grid item xs={12} md={6}>
-          <UsageOverallEndpointPlot filters={filters} />
+        <Grid item xs={12}>
+          <CallsPlotByEndpointOrg res={res} />
+        </Grid>
+        <Grid item xs={12}>
+          <UsageCostPerCallPlot res={res} />
         </Grid>
         <Grid item xs={12}>
           <UsageMonthlyPlot filters={filters} />
         </Grid>
-        {/* Add more <Grid item> components here for new plots */}
+        {/* Add more <Grid item xs={12}> for additional full-width plots */}
       </Grid>
     </Box>
   );
