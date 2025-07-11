@@ -19,6 +19,7 @@ import { SettingsPage } from './pages/Settings/Settings';
 import { EndpointTab } from './pages/Settings/Endpoint/Endpoint';
 import { ResourceTypeTab } from './pages/Settings/ResourceType/ResourceType';
 import { ViewTierPricingPage } from './pages/Pricing/ViewPricing';
+import { PermissionTypeTab } from './pages/Settings/PermissionType/PermissionType';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -39,6 +40,7 @@ const router = createBrowserRouter(
           <Route index element={<Navigate to="types" replace />} errorElement={<Error />} />
           <Route path="endpoints" element={<EndpointTab />} errorElement={<Error />} />
           <Route path="types" element={<ResourceTypeTab />} errorElement={<Error />} />
+          <Route path="permissions" element={<PermissionTypeTab />} errorElement={<Error />} />
         </Route>
       </Route>,
       <Route path="*" element={<NotFound />} />

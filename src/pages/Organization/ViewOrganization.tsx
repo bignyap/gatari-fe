@@ -216,7 +216,13 @@ function ViewOrganizationLoader({ navigate }: { navigate: (path: string) => void
           <AccordionSummary expandIcon={<ExpandMore />}>
             <Typography fontWeight={600}>Subscription</Typography>
           </AccordionSummary>
-          <AccordionDetails>
+          <AccordionDetails
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
             {organization && (
               <SubscriptionLoader
                 orgId={Number(id)}

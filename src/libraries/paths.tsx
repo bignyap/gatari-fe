@@ -9,6 +9,7 @@ export const API_PATHS = {
   endpoint: '/apiEndpoint',
   organizationType: '/orgType',
   resourceType: '/resourceType',
+  permissionType: '/permissionType',
   subscriptionTier: '/subTier',
   subscription: '/subscription',
   tierPricing: '/tierPricing',

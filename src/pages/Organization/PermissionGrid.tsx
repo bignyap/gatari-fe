@@ -11,13 +11,13 @@ import {
   TableHead,
   TableRow,
   CircularProgress,
+  Tooltip,
 } from '@mui/material';
 import { ListOrgPermission, UpdateOrgPermission } from '../../libraries/OrgPermission';
-import { ListResourceTypes } from '../../libraries/ResourceType';
+import { ListAllResourceTypes } from '../../libraries/ResourceType';
+import { ListAllPermissionTypes } from '../../libraries/PermissionType';
 import CommonButton from '../../components/Common/Button';
 import { Save, Cancel, Edit } from '@mui/icons-material';
-
-const CRUD_CODES = ['C', 'R', 'U', 'D'];
 
 const diagonalHeaderCellSx = {
   position: 'relative',
@@ -75,9 +75,16 @@ interface ResourceTypeData {
   description: string;
 }
 
+interface PermissionTypeData {
+  name: string;
+  code: string;
+  description: string;
+}
+
 const PermissionGrid: React.FC<{ organizationId: number }> = ({ organizationId }) => {
   const [orgPermissions, setOrgPermissions] = useState<OrgPermissionData[]>([]);
   const [resourceTypes, setResourceTypes] = useState<ResourceTypeData[]>([]);
+  const [permissionTypes, setPermissionTypes] = useState<PermissionTypeData[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editedPermissions, setEditedPermissions] = useState<Set<string>>(new Set());
@@ -86,9 +93,11 @@ const PermissionGrid: React.FC<{ organizationId: number }> = ({ organizationId }
     setLoading(true);
     try {
       const allPermissions = await ListOrgPermission(organizationId, 1, 100);
-      const resources = await ListResourceTypes(1, 100);
-      setOrgPermissions(Array.isArray(allPermissions) ? allPermissions : [])
+      const resources = await ListAllResourceTypes();
+      const allPermissionTypes = await ListAllPermissionTypes();
+      setOrgPermissions(Array.isArray(allPermissions) ? allPermissions : []);
       setResourceTypes(resources);
+      setPermissionTypes(allPermissionTypes);
       setEditedPermissions(
         new Set(allPermissions.map((p: any) => `${p.resourceTypeId}-${p.permissionCode}`))
       );
@@ -107,29 +116,62 @@ const PermissionGrid: React.FC<{ organizationId: number }> = ({ organizationId }
   const togglePermission = (resourceId: number, code: string) => {
     const key = `${resourceId}-${code}`;
     const newSet = new Set(editedPermissions);
-    if (newSet.has(key)) {
-      newSet.delete(key);
-    } else {
-      newSet.add(key);
-    }
+    newSet.has(key) ? newSet.delete(key) : newSet.add(key);
     setEditedPermissions(newSet);
   };
 
-  const handleSave = () => {
-    UpdateOrgPermission(organizationId, Array.from(editedPermissions).map((key) => {
-        const [resourceTypeId, permissionCode] = key.split('-');
-        return { "resource_type_id": Number(resourceTypeId), "permission_code": permissionCode };
-      }),
-    );    
-    setIsEditMode(false);
+  const handleSave = async () => {
+    try {
+      await UpdateOrgPermission(
+        organizationId,
+        Array.from(editedPermissions).map((key) => {
+          const [resourceTypeId, permissionCode] = key.split('-');
+          return {
+            resource_type_id: Number(resourceTypeId),
+            permission_code: permissionCode,
+          };
+        })
+      );
+      setIsEditMode(false);
+      fetchData();
+    } catch (e) {
+      console.error('Error saving permissions', e);
+    }
   };
 
   const handleCancel = () => {
-    // Reset to original
     setEditedPermissions(
       new Set(orgPermissions.map((p) => `${p.resourceTypeId}-${p.permissionCode}`))
     );
     setIsEditMode(false);
+  };
+
+  const toggleAllForResource = (resourceId: number) => {
+    const newSet = new Set(editedPermissions);
+    const allSet = permissionTypes.every((p) =>
+      newSet.has(`${resourceId}-${p.code}`)
+    );
+
+    permissionTypes.forEach((p) => {
+      const key = `${resourceId}-${p.code}`;
+      allSet ? newSet.delete(key) : newSet.add(key);
+    });
+
+    setEditedPermissions(newSet);
+  };
+
+  const toggleAllForPermission = (code: string) => {
+    const newSet = new Set(editedPermissions);
+    const allSet = resourceTypes.every((r) =>
+      newSet.has(`${r.id}-${code}`)
+    );
+
+    resourceTypes.forEach((r) => {
+      const key = `${r.id}-${code}`;
+      allSet ? newSet.delete(key) : newSet.add(key);
+    });
+
+    setEditedPermissions(newSet);
   };
 
   useEffect(() => {
@@ -196,13 +238,21 @@ const PermissionGrid: React.FC<{ organizationId: number }> = ({ organizationId }
                   <Box sx={topLabelSx}>Code</Box>
                   <Box sx={bottomLabelSx}>Resource</Box>
                 </TableCell>
-                {CRUD_CODES.map((code) => (
-                  <TableCell
-                    key={code}
-                    align="center"
-                    sx={{ color: 'text.primary' }}
-                  >
-                    {code}
+                {permissionTypes.map((perm) => (
+                  <TableCell key={perm.code} align="center">
+                    <Tooltip title={perm.name}>
+                      <Box>
+                        {perm.code}
+                        <Checkbox
+                          size="small"
+                          disabled={!isEditMode}
+                          checked={resourceTypes.every((r) =>
+                            hasPermission(r.id, perm.code)
+                          )}
+                          onChange={() => toggleAllForPermission(perm.code)}
+                        />
+                      </Box>
+                    </Tooltip>
                   </TableCell>
                 ))}
               </TableRow>
@@ -211,27 +261,42 @@ const PermissionGrid: React.FC<{ organizationId: number }> = ({ organizationId }
               {resourceTypes.map((resource) => (
                 <TableRow key={resource.id}>
                   <TableCell sx={{ color: 'text.primary' }}>
-                    {resource.name}
-                  </TableCell>
-                  {CRUD_CODES.map((code) => (
-                    <TableCell key={code} align="center">
+                    <Box display="flex" alignItems="center" justifyContent="space-between">
+                      {resource.name}
                       <Checkbox
-                        checked={hasPermission(resource.id, code)}
+                        size="small"
                         disabled={!isEditMode}
-                        onChange={() => togglePermission(resource.id, code)}
+                        checked={permissionTypes.every((p) =>
+                          hasPermission(resource.id, p.code)
+                        )}
+                        onChange={() => toggleAllForResource(resource.id)}
+                      />
+                    </Box>
+                  </TableCell>
+                  {permissionTypes.map((perm) => (
+                    <TableCell
+                      key={`${resource.id}-${perm.code}`}
+                      align="center"
+                    >
+                      <Checkbox
+                        checked={hasPermission(resource.id, perm.code)}
+                        disabled={!isEditMode}
+                        onChange={() =>
+                          togglePermission(resource.id, perm.code)
+                        }
                         sx={{
-                            color: 'rgba(0, 0, 0, 0.54)', // base icon color (like MUI default)
-                            '&.Mui-checked': {
-                              color: 'rgba(0, 0, 0, 0.87)', // solid black check for contrast
-                            },
-                            '&:hover': {
-                              backgroundColor: 'rgba(0, 0, 0, 0.04)', // subtle hover
-                            },
-                            '& .MuiSvgIcon-root': {
-                              fontSize: 20,
-                              filter: 'drop-shadow(0 0 1px rgba(0, 0, 0, 0.2))',
-                            },
-                          }}
+                          color: 'rgba(0, 0, 0, 0.54)',
+                          '&.Mui-checked': {
+                            color: 'rgba(0, 0, 0, 0.87)',
+                          },
+                          '&:hover': {
+                            backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                          },
+                          '& .MuiSvgIcon-root': {
+                            fontSize: 20,
+                            filter: 'drop-shadow(0 0 1px rgba(0, 0, 0, 0.2))',
+                          },
+                        }}
                       />
                     </TableCell>
                   ))}

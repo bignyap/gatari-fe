@@ -15,8 +15,9 @@ const pages = [
     name: 'Resources',
     link: '/resources',
     children: [
-      { name: 'Endpoints', link: '/resources/endpoints' },
+      { name: 'Permissions', link: '/resources/permissions' },
       { name: 'Resources', link: '/resources/types' },
+      { name: 'Endpoints', link: '/resources/endpoints' },
     ],
   },
   { name: 'Usage', link: '/usage' },
