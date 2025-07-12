@@ -7,7 +7,7 @@ export default function PlotCard({
   height = 300,
   children,
 }: {
-  title: string;
+  title?: string; // <-- made optional
   height?: number;
   children: React.ReactNode;
 }) {
@@ -27,15 +27,17 @@ export default function PlotCard({
         },
       }}
     >
-      <Typography
-        variant="subtitle1"
-        fontWeight={700}
-        color="text.primary"
-        mb={2}
-        sx={{ textTransform: "capitalize", letterSpacing: 0.3 }}
-      >
-        {title}
-      </Typography>
+      {title && (
+        <Typography
+          variant="subtitle1"
+          fontWeight={700}
+          color="text.primary"
+          mb={2}
+          sx={{ textTransform: "capitalize", letterSpacing: 0.3 }}
+        >
+          {title}
+        </Typography>
+      )}
 
       <Box
         sx={{

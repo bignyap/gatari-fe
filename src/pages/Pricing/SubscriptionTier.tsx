@@ -1,196 +1,189 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ListSubscriptionTiers, DeleteSubscriptionTier } from '../../libraries/SubscriptionTier';
-import CircularProgress from '@mui/material/CircularProgress';
-import { EnhancedTable } from '../../components/Table/Table'
-import { HeadCell, FormatCellValue } from '../../components/Table/Utils';
-import SearchIcon from '@mui/icons-material/Search';
-import { CustomizedSnackbars } from '../../components/Common/Toast';
-import TierModal from './TierModal';
-import { TextField, InputAdornment }  from '@mui/material'; 
-import CommonButton from '../../components/Common/Button';
+import {
+  Box,
+  Divider,
+  List,
+  ListItemButton,
+  ListItemText,
+  Typography,
+  CircularProgress,
+  useTheme,
+  useMediaQuery,
+  IconButton,
+} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useSearchParams } from 'react-router-dom';
+import { ListSubscriptionTiers } from '../../libraries/SubscriptionTier';
+import TierModal from './TierModal';
+import { CustomizedSnackbars } from '../../components/Common/Toast';
+import TierPricingView from './ViewPricing';
 
 export function SubScriptionTierTab() {
-    return (
-      <div>
-        <SubScriptionTierLoader />
-      </div>
-    );
-  }
+  return <SubScriptionTierLoader />;
+}
 
 export function SubScriptionTierLoader() {
-    const navigate = useNavigate();
-    const [count, setCount] = useState<number>(-1);
-    const [subTiers, setSubTiers] = useState<any[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [snackbar, setSnackbar] = useState<{ message: string, status: string } | null>(null);
-    const [itemsPerPage, setItemsPerPage] = useState<number>(10);
-    const [page, setPage] = useState<number>(0);
-  
-    async function fetchTiers(newPage: number, itemsPerPage: number) {
+  const [tiers, setTiers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [snackbar, setSnackbar] = useState<{ message: string; status: string } | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedTierId = searchParams.get('id');
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'), { noSsr: true });
+
+  useEffect(() => {
+    async function fetchTiers() {
       try {
-        const subTierData = await ListSubscriptionTiers(newPage, itemsPerPage);
-        const iCount = subTierData["total_items"];
-        setCount(iCount);
-        if (iCount > 0) {
-          setSubTiers(subTierData["data"]);
-        }; 
-      } catch (error) {
-        console.error("Error fetching tiers:", error);
-        setSubTiers([]);
-        setSnackbar({
-          message: "Failed to load tiers. Please try again later.",
-          status: "error"
-        });
+        const res = await ListSubscriptionTiers(1, 100);
+        setTiers(res.data || []);
+        if (!selectedTierId && res.data?.length > 0) {
+          setSearchParams({ id: String(res.data[0].id) });
+        }
+      } catch (err) {
+        setSnackbar({ message: 'Failed to load tiers.', status: 'error' });
       } finally {
         setLoading(false);
       }
     }
 
-    const onDeleteTier = async (row: any) => {
-      try {
-        await DeleteSubscriptionTier(row["id"]);
-        fetchTiers(page + 1, itemsPerPage);
-      } catch (error) {
-        console.error("Error deleting organization:", error);
-        setSnackbar({
-          message: "Failed to delete organization. Please try again later.",
-          status: "error"
-        });
-      }
-    };
-  
-    useEffect(() => {
-      fetchTiers(page + 1, itemsPerPage);
-    }, [itemsPerPage, page]);
-  
-    if (loading) {
-      return (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-          <CircularProgress />
-        </div>
-      );
-    }
-  
-    const handleCreateTier = async () => {
-      setIsModalOpen(true);
-    };
-    
-    const onPageChange = async (newPage: number) => {
-      await fetchTiers(newPage, itemsPerPage)
-    };
+    fetchTiers();
+  }, []);
 
-    const handleChangePage = (newPage: number) => {
-      setPage(newPage);
-      onPageChange(newPage + 1);
-    };
-    
-    const handleRowsPerPageChange = (newItemsPerPage: number) => {
-      setItemsPerPage(newItemsPerPage);
-      fetchTiers(1, newItemsPerPage);
-    };
-    
-    const handleTierCreated = () => {
-      fetchTiers(1, itemsPerPage);
-    };
+  const handleTierSelect = (id: string) => {
+    setSearchParams({ id });
+  };
 
-    return (
-      <div>
-        {snackbar && (
-          <CustomizedSnackbars
-            message={snackbar.message}
-            status={snackbar.status}
-            open={true} // Ensure the snackbar opens automatically
-            onClose={() => setSnackbar(null)}
-          />
-        )}
-        <EnhancedTable
-          rows={subTiers}
-          renderCell={(key, value, row) => {
-            if (key === 'name') {
-              return (
-                <a href={`/subTier/${row.id}`} style={{ textDecoration: 'underline', cursor: 'pointer' }}>
-                  {value}
-                </a>
-              );
-            } else {
-              return FormatCellValue(value)
-            }
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
+        width: '100vw',
+        height: { xs: 'calc(100vh - 56px)', sm: 'calc(100vh - 64px)' },
+        m: 0,
+        p: 0,
+      }}
+    >
+      {/* LEFT PANE */}
+      <Box
+        sx={{
+          display: isMobile && selectedTierId ? 'none' : 'flex',
+          width: 320,
+          flexShrink: 0,
+          height: '100%',
+          borderRight: isMobile ? 'none' : '1px solid #ddd',
+          borderBottom: isMobile ? '1px solid #ddd' : 'none',
+          flexDirection: 'column',
+          backgroundColor: '#fafafa',
+          transition: 'all 0.3s ease',
+        }}
+      >
+        {/* Sticky Header */}
+        <Box
+          sx={{
+            px: 2,
+            pt: 2,
+            pb: 1,
+            position: 'sticky',
+            top: 0,
+            zIndex: 10,
+            bgcolor: '#fafafa',
           }}
-          headCells={headCells}
-          defaultSort="id"
-          defaultRows={10}
-          stickyColumnIds={["name"]}
-          page={page}
-          onPageChange={handleChangePage}
-          count={count}
-          onRowsPerPageChange={handleRowsPerPageChange}
-          stickyRight={true}
-          menuOptions={['View', 'Delete']}
-          onOptionSelect={(action, row) => {
-            switch (action) {
-              case 'View':
-                navigate(`/subTier/${row["id"]}`);
-                break;
-              case 'Delete':
-                onDeleteTier(row);
-                break;
-              default:
-                break;
-            }
-          }}
-          title={
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'space-between', alignItems: 'center' }}>
-              <TextField
-                variant="outlined"
-                placeholder="Search..."
-                size="small"
-                style={{ width: '400px' }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                }}
-                // Add onChange handler if needed
+        >
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <ListItemButton
+              onClick={() => setIsModalOpen(true)}
+              sx={{
+                borderRadius: 1,
+                px: 2,
+                py: 1,
+                bgcolor: 'grey.100',
+                '&:hover': { bgcolor: 'grey.200' },
+              }}
+            >
+              <AddIcon fontSize="small" sx={{ mr: 1 }} />
+              <ListItemText
+                primary="Create Subscription Tier"
+                primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 500 }}
               />
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <CommonButton
-                  label='CREATE SUBSCRIPTION TIER'
-                  component="label"
-                  role={undefined}
-                  variant="contained"
-                  tabIndex={-1}
-                  startIcon={<AddIcon />}
-                  onClick={handleCreateTier}
-                />
-              </div>
-            </div>
-          }
-          tableContainerSx= {{
-            maxHeight: '70vh',
-            overflowX: 'auto',
-            overflowY: 'auto'
+            </ListItemButton>
+          </Box>
+
+          <Divider sx={{ mt: 2 }} />
+        </Box>
+
+        {/* Scrollable List */}
+        <Box sx={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <List>
+              {tiers.map((tier) => (
+                <ListItemButton
+                  key={tier.id}
+                  selected={String(tier.id) === selectedTierId}
+                  onClick={() => handleTierSelect(String(tier.id))}
+                >
+                  <ListItemText primary={tier.name} />
+                </ListItemButton>
+              ))}
+            </List>
+          )}
+        </Box>
+      </Box>
+
+      {/* RIGHT PANE */}
+      {(!isMobile || selectedTierId) && (
+        <Box
+          sx={{
+            flexGrow: 1,
+            height: '100%',
+            overflowY: 'auto',
+            backgroundColor: '#f5f5f5',
+            p: isMobile ? 2 : 2,
+          }}
+        >
+          {isMobile && selectedTierId && (
+            <IconButton onClick={() => setSearchParams({})} sx={{ mb: 2 }}>
+              <ArrowBackIcon />
+            </IconButton>
+          )}
+
+          {selectedTierId ? (
+            <TierPricingView tierId={Number(selectedTierId)} />
+          ) : (
+            !isMobile && (
+              <Typography variant="h6">Select a tier to view pricing</Typography>
+            )
+          )}
+        </Box>
+      )}
+
+      {/* Modals */}
+      {isModalOpen && (
+        <TierModal
+          onClose={() => setIsModalOpen(false)}
+          onTierCreated={() => {
+            setIsModalOpen(false);
+            window.location.reload();
           }}
         />
-        {isModalOpen && (
-          <TierModal
-            onClose={() => setIsModalOpen(false)}
-            onTierCreated={handleTierCreated}
-          />
-        )}
-      </div>
-    );
-  }
-  
-  const headCells: HeadCell[] = [
-    // { id: 'id', label: 'ID' },
-    { id: 'name', label: 'Name', width: 20 },
-    { id: 'archived', label: 'Archived' },
-    { id: 'description', label: 'Description' },
-    { id: 'created_at', label: 'Created At'},
-    { id: 'updated_at', label: 'Updated At'}
-  ];
+      )}
+
+      {/* Snackbar */}
+      {snackbar && (
+        <CustomizedSnackbars
+          message={snackbar.message}
+          status={snackbar.status}
+          open={true}
+          onClose={() => setSnackbar(null)}
+        />
+      )}
+    </Box>
+  );
+}

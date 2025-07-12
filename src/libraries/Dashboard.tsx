@@ -13,3 +13,20 @@ export async function GetDashboardCount(): Promise<any> {
   return GetData(finalUrl);
 
 }
+
+export async function GetDashboardUsage(queryParams: Record<string, any>): Promise<any> {
+    
+    const filteredQueryParams = Object.fromEntries(
+        Object.entries(queryParams).filter(([_, value]) => value !== undefined && value !== null)
+    );
+
+    const finalUrl = BuildUrl(getDashboardUrl(), "usage")
+
+    const output = await GetData(finalUrl, filteredQueryParams);
+
+    if (!output || output.length === 0) {
+        return [];
+    }
+
+    return output;
+}

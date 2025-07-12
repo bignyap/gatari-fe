@@ -1,120 +1,223 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ListOrganizations, DeleteOrganization } from '../../libraries/Organization';
-import OrganizationModal from './OrganizationModal';
-import { EnhancedTable } from '../../components/Table/Table'
-import { HeadCell, FormatCellValue } from '../../components/Table/Utils';
-import SearchIcon from '@mui/icons-material/Search';
-import { TextField, InputAdornment, Box }  from '@mui/material'; 
-import { CustomizedSnackbars } from '../../components/Common/Toast';
-import CircularProgress from '@mui/material/CircularProgress';
-import OrgTypeModal from '../OrganizationType/OrgTypeModal';
-import CommonButton from '../../components/Common/Button';
+import {
+  Box,
+  Divider,
+  List,
+  ListItemButton,
+  ListItemText,
+  Typography,
+  CircularProgress,
+  useTheme,
+  useMediaQuery,
+  IconButton,
+} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { ListOrganizations } from '../../libraries/Organization';
+import OrganizationModal from './OrganizationModal';
+import OrgTypeModal from '../OrganizationType/OrgTypeModal';
+import { CustomizedSnackbars } from '../../components/Common/Toast';
+import { ViewOrganizationPage } from './ViewOrganization';
+import { useSearchParams } from 'react-router-dom';
 
 export function OrganizationPage() {
-  return (
-    <div className="container">
-      <OrganizationLoader />
-    </div>
-  );
-}
-
-export function OrganizationLoader() {
-  
   const [organizations, setOrganizations] = useState<any[]>([]);
-  const [count, setCount] = useState<number>(-1);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [isTypeModalOpen, setIsTypeModalOpen] = useState<boolean>(false);
-  const [snackbar, setSnackbar] = useState<{ message: string, status: string } | null>(null);
-  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
-  const [page, setPage] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
+  const [snackbar, setSnackbar] = useState<{ message: string; status: string } | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isTypeModalOpen, setIsTypeModalOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedOrgId = searchParams.get("id");
 
-  const navigate = useNavigate();
-
-  async function fetchOrganizations(newPage: number, itemsPerPage: number) {
-    try {
-      const orgData = await ListOrganizations(newPage, itemsPerPage);
-      const iCount = orgData["total_items"];
-      setCount(iCount);
-      if (iCount > 0) {
-        setOrganizations(orgData["data"]);
-      }; 
-    } catch (error) {
-      console.error("Error fetching organizations:", error);
-      setOrganizations([]);
-      setSnackbar({
-        message: "Failed to load organizations. Please try again later.",
-        status: "error"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const onDeleteOrg = async (row: any) => {
-    try {
-      await DeleteOrganization(row["id"]);
-      fetchOrganizations(page + 1, itemsPerPage);
-    } catch (error) {
-      console.error("Error deleting organization:", error);
-      setSnackbar({
-        message: "Failed to delete organization. Please try again later.",
-        status: "error"
-      });
-    }
-  };
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'), { noSsr: true });
 
   useEffect(() => {
-    fetchOrganizations(page + 1, itemsPerPage);
-  }, [itemsPerPage, page]);
+    async function fetchOrganizations() {
+      try {
+        const data = await ListOrganizations(1, 100);
+        setOrganizations(data.data || []);
+        if (!selectedOrgId && data.data?.length > 0) {
+          setSearchParams({ id: String(data.data[0].id) });
+        }
+      } catch (err) {
+        setSnackbar({ message: 'Failed to load organizations.', status: 'error' });
+      } finally {
+        setLoading(false);
+      }
+    }
 
-  if (loading) {
-    return (
-      <Box
-        sx={{
-          height: '100%',
-          width: '100%',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <CircularProgress />
-      </Box>
-    );
-  }
-  
+    fetchOrganizations();
+  }, []);
 
-  const handleCreateOrganization = async () => {
-    setIsModalOpen(true);
+  const handleOrgSelect = (id: string) => {
+    setSearchParams({ id });
   };
 
-  const handleCreateOrgType = async () => {
-    setIsTypeModalOpen(true)
-  }
-
-  const onPageChange = async (newPage: number) => {
-    await fetchOrganizations(newPage, itemsPerPage)
-  };
-
-  const handleRowsPerPageChange = (newItemsPerPage: number) => {
-    setItemsPerPage(newItemsPerPage);
-    fetchOrganizations(1, newItemsPerPage);
-  };
-
-  const handleChangePage = (newPage: number) => {
-    setPage(newPage);
-    onPageChange(newPage + 1);
-  };
-
-  const handleOrganizationCreated = () => {
-    fetchOrganizations(1, itemsPerPage);
-  };
+  const groupedOrgs = organizations.reduce((acc: Record<string, any[]>, org) => {
+    const type = org.type || 'Other';
+    acc[type] = acc[type] || [];
+    acc[type].push(org);
+    return acc;
+  }, {});
 
   return (
-    <div>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
+        width: '100vw',
+        height: { xs: 'calc(100vh - 56px)', sm: 'calc(100vh - 64px)' },
+        m: 0,
+        p: 0,
+      }}
+    >
+      {/* LEFT PANE */}
+      <Box
+        sx={{
+          display: isMobile && selectedOrgId ? 'none' : 'flex',
+          width: 320,
+          flexShrink: 0,
+          height: '100%',
+          borderRight: isMobile ? 'none' : '1px solid #ddd',
+          borderBottom: isMobile ? '1px solid #ddd' : 'none',
+          flexDirection: 'column',
+          backgroundColor: '#fafafa',
+          transition: 'all 0.3s ease',
+        }}
+      >
+          {/* Sticky Header */}
+          <Box
+            sx={{
+              px: 2,
+              pt: 2,
+              pb: 1,
+              position: 'sticky',
+              top: { xs: '56px', sm: '64px' },
+              zIndex: 10,
+              bgcolor: '#fafafa',
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <ListItemButton
+                onClick={() => setIsModalOpen(true)}
+                sx={{
+                  borderRadius: 1,
+                  px: 2,
+                  py: 1,
+                  bgcolor: 'grey.100',
+                  '&:hover': { bgcolor: 'grey.200' },
+                }}
+              >
+                <AddIcon fontSize="small" sx={{ mr: 1 }} />
+                <ListItemText
+                  primary="Create Organization"
+                  primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 500 }}
+                />
+              </ListItemButton>
+
+              <ListItemButton
+                onClick={() => setIsTypeModalOpen(true)}
+                sx={{
+                  borderRadius: 1,
+                  px: 2,
+                  py: 1,
+                  bgcolor: 'grey.100',
+                  '&:hover': { bgcolor: 'grey.200' },
+                }}
+              >
+                <AddIcon fontSize="small" sx={{ mr: 1 }} />
+                <ListItemText
+                  primary="Create Org Type"
+                  primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 500 }}
+                />
+              </ListItemButton>
+            </Box>
+
+            <Divider sx={{ mt: 2 }} />
+          </Box>
+
+          {/* Scrollable List */}
+          <Box sx={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
+            {loading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                <CircularProgress />
+              </Box>
+            ) : (
+              <List sx={{ py: 0 }}>
+                {Object.entries(groupedOrgs).map(([type, orgs]) => (
+                  <Box key={type} sx={{ px: 1 }}>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        textTransform: 'uppercase',
+                        fontWeight: 600,
+                        color: 'text.secondary',
+                        px: 1,
+                        pt: 1,
+                      }}
+                    >
+                      {type}
+                    </Typography>
+                    {orgs.map((org) => (
+                      <ListItemButton
+                        key={org.id}
+                        selected={String(org.id) === selectedOrgId}
+                        onClick={() => handleOrgSelect(String(org.id))}
+                      >
+                        <ListItemText primary={org.name} />
+                      </ListItemButton>
+                    ))}
+                  </Box>
+                ))}
+              </List>
+            )}
+          </Box>
+      </Box>
+
+      {/* RIGHT PANE */}
+      {(!isMobile || selectedOrgId) && (
+        <Box
+          sx={{
+            flexGrow: 1,
+            height: '100%',
+            overflowY: 'auto',
+            backgroundColor: '#f5f5f5',
+            p: isMobile ? 2 : 2,
+          }}
+        >
+      
+          {isMobile && selectedOrgId && (
+            <IconButton onClick={() => setSearchParams({})} sx={{ mb: 2 }}>
+              <ArrowBackIcon />
+            </IconButton>
+          )}
+
+          {selectedOrgId ? (
+            <ViewOrganizationPage key={selectedOrgId} orgId={Number(selectedOrgId)} />
+          ) : (
+            !isMobile && (
+              <Typography variant="h6">Select an organization to view details</Typography>
+            )
+          )}
+        </Box>
+      )}
+
+      {/* Modals */}
+      {isModalOpen && (
+        <OrganizationModal
+          onClose={() => setIsModalOpen(false)}
+          onOrganizationCreated={() => window.location.reload()}
+        />
+      )}
+      {isTypeModalOpen && (
+        <OrgTypeModal
+          onClose={() => setIsTypeModalOpen(false)}
+          onOrgTypeCreated={() => setIsTypeModalOpen(false)}
+        />
+      )}
+
+      {/* Toast */}
       {snackbar && (
         <CustomizedSnackbars
           message={snackbar.message}
@@ -123,104 +226,6 @@ export function OrganizationLoader() {
           onClose={() => setSnackbar(null)}
         />
       )}
-      <EnhancedTable
-        rows={organizations}
-        renderCell={(key, value, row) => {
-          if (key === 'name') {
-            return (
-              <a href={`/organizations/${row.id}`} style={{ textDecoration: 'underline', cursor: 'pointer' }}>
-                {value}
-              </a>
-            );
-          }else {
-            return FormatCellValue(value)
-          }
-        }}
-        headCells={headCells}
-        defaultSort="id"
-        defaultRows={10}
-        stickyColumnIds={["id", "name"]}
-        page={page}
-        onPageChange={handleChangePage}
-        count={count}
-        onRowsPerPageChange={handleRowsPerPageChange}
-        stickyRight={true}
-        menuOptions={['View', 'Delete']}
-        onOptionSelect={(action, row) => {
-          switch (action) {
-            case 'View':
-              navigate(`/organizations/${row["id"]}`);
-              break;
-            case 'Delete':
-              onDeleteOrg(row);
-              break;
-            default:
-              break;
-          }
-        }}
-        title={
-          <div style={{ display: 'flex', gap: '10px', justifyContent: 'space-between', alignItems: 'center' }}>
-            <TextField
-              variant="outlined"
-              placeholder="Search..."
-              size="small"
-              style={{ width: '400px' }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              }}
-              // Add onChange handler if needed
-            />
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <CommonButton
-                label="CREATE ORGANIZATION"
-                onClick={handleCreateOrganization}
-                component="label"
-                startIcon={<AddIcon />}
-              />
-
-              <CommonButton
-                label="CREATE ORGANIZATION TYPE"
-                onClick={handleCreateOrgType}
-                component="label"
-                startIcon={<AddIcon />}
-              />
-            </div>
-          </div>
-        }
-      />
-      {isModalOpen && (
-        <OrganizationModal
-          onClose={() => setIsModalOpen(false)}
-          onOrganizationCreated={handleOrganizationCreated}
-        />
-      )}
-      {
-        isTypeModalOpen && (
-          <OrgTypeModal
-            onClose={() => setIsTypeModalOpen(false)}
-            onOrgTypeCreated={() => setIsTypeModalOpen(false)}
-          />
-        )
-      }
-    </div>
+    </Box>
   );
 }
-
-const headCells: HeadCell[] = [
-  // { id: 'id', label: 'ID', width: 20 },
-  { id: 'name', label: 'Name', width: 20 },
-  // { id: 'decoratedName', label: 'Name', width: 20 },
-  { id: 'type', label: 'Type' },
-  { id: 'realm', label: 'Realm' },
-  { id: 'country', label: 'Country' },
-  { id: 'support_email', label: 'Support Email' },
-  { id: 'active', label: 'Active' },
-  { id: 'report_q', label: 'Reporting' },
-  // { id: 'config', label: 'Config' },
-  { id: 'created_at', label: 'Created At' },
-  { id: 'updated_at', label: 'Updated At' },
-];

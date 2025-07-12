@@ -1,17 +1,7 @@
 import {
-  Box,
-  Typography,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails
+  Box, Typography, Accordion, AccordionSummary, AccordionDetails
 } from '@mui/material';
-import {
-  ExpandMore,
-  ArrowBack,
-  Edit,
-  Cancel,
-  Save
-} from '@mui/icons-material';
+import { ExpandMore, Edit, Cancel, Save } from '@mui/icons-material';
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
@@ -40,16 +30,16 @@ interface OrganizationRow {
   type_id: number;
 }
 
-export function ViewOrganizationPage() {
+export function ViewOrganizationPage({ orgId }: { orgId: number }) {
   const navigate = useNavigate();
   return (
-    <Box sx={{ pt: 4 }}>
-      <ViewOrganizationLoader navigate={navigate} />
+    <Box>
+      <ViewOrganizationLoader navigate={navigate} orgId={orgId} />
     </Box>
   );
 }
 
-function ViewOrganizationLoader({ navigate }: { navigate: (path: string) => void }) {
+function ViewOrganizationLoader({ navigate, orgId }: { navigate: (path: string) => void, orgId: number }) {
   const { id } = useParams<{ id: string }>();
   const [organization, setOrganization] = useState<OrganizationRow | null>(null);
   const [loading, setLoading] = useState(true);
@@ -59,8 +49,8 @@ function ViewOrganizationLoader({ navigate }: { navigate: (path: string) => void
   const formRef = useRef<HTMLFormElement | null>(null);
 
   useEffect(() => {
-    if (id) fetchOrganization(Number(id));
-  }, [id]);
+    if (orgId) fetchOrganization(orgId);
+  }, [orgId]);  
 
   async function fetchOrganization(id: number) {
     try {
@@ -111,23 +101,17 @@ function ViewOrganizationLoader({ navigate }: { navigate: (path: string) => void
         />
       )}
 
-      <Box display="flex" alignItems="center" justifyContent="space-between" mb={2} width="100%">
-        <Typography variant="h4" fontWeight={600} sx={{ textAlign: 'left', flexGrow: 1 }}>
-          {organization?.name || 'Organization'}
-        </Typography>
-        <Box display="flex" gap={1}>
-          <CommonButton
-            label="Back"
-            variant="contained"
-            startIcon={<ArrowBack />}
-            onClick={() => navigate('/organizations')}
-          />
-        </Box>
-      </Box>
-
-      <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 2 }}>
-       
-        <Accordion sx={{ width: '100%' }}>
+      <Box
+        sx={{
+          width: '100%',
+          maxWidth: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+          boxSizing: 'border-box',
+        }}
+      >
+        <Accordion sx={{ width: '100%' }} defaultExpanded>
           <AccordionSummary expandIcon={<ExpandMore />}>
             <Typography fontWeight={600}>Info</Typography>
           </AccordionSummary>
@@ -217,24 +201,29 @@ function ViewOrganizationLoader({ navigate }: { navigate: (path: string) => void
             <Typography fontWeight={600}>Subscription</Typography>
           </AccordionSummary>
           <AccordionDetails
-            sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-          >
-            {organization && (
-              <SubscriptionLoader
-                orgId={Number(id)}
-                subInitName={organization.name}
-                tableContainerSx={{
-                  maxHeight: '50vh',
-                  overflowX: 'auto',
-                  overflowY: 'auto',
-                }}
-              />
-            )}
-          </AccordionDetails>
+              sx={{
+                width: '100%',
+                overflowX: 'auto',
+                px: 2,
+                pt: 1,
+                pb: 2,
+              }}
+            >
+              {organization && (
+                <Box sx={{ width: '100%', overflowX: 'auto' }}>
+                  <SubscriptionLoader
+                    orgId={Number(id)}
+                    subInitName={organization.name}
+                    tableContainerSx={{
+                      width: '100%',
+                      maxHeight: '50vh',
+                      overflowX: 'auto',
+                      overflowY: 'auto',
+                    }}
+                  />
+                </Box>
+              )}
+            </AccordionDetails>
         </Accordion>
 
         <Accordion sx={{ width: '100%' }}>

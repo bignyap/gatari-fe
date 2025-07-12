@@ -122,7 +122,7 @@ export default function CountPage() {
         height: "100%",
         width: "100%",
         position: "relative",
-        padding: 2,
+        padding: 1.5,
         boxSizing: "border-box",
         "&:hover .nav-arrow": { opacity: isMobile ? 0 : 1 },
       }}
@@ -185,7 +185,7 @@ export default function CountPage() {
                   onClick={() => navigate(item.route)}
                   sx={{
                     width: "100%",
-                    height: isMobile ? "100%" : 140,
+                    height: isMobile ? "100%" : 120,
                     aspectRatio: isMobile ? "1 / 1" : undefined,
                     borderRadius: 3,
                     boxShadow: 4,
@@ -208,7 +208,7 @@ export default function CountPage() {
                       flexDirection: "column",
                       alignItems: "center",
                       justifyContent: "center",
-                      gap: 1,
+                      gap: 0.8,
                       textAlign: "center",
                     }}
                   >
@@ -217,7 +217,7 @@ export default function CountPage() {
                         background: "rgba(255, 255, 255, 0.15)",
                         backdropFilter: "blur(6px)",
                         borderRadius: "50%",
-                        padding: 1.2,
+                        padding: 1,
                         boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
                         color: theme.palette.primary.main,
                       }}
@@ -230,7 +230,7 @@ export default function CountPage() {
                       fontWeight="bold"
                       sx={{
                         color: theme.palette.text.primary,
-                        fontSize: isMobile ? "1.1rem" : "1.25rem",
+                        fontSize: isMobile ? "1rem" : "1.1rem", // was 1.1 / 1.25
                       }}
                     >
                       {item.total}
@@ -240,7 +240,7 @@ export default function CountPage() {
                       <Typography
                         variant="caption"
                         color="text.secondary"
-                        fontSize={12}
+                        fontSize={11} // was 12
                         sx={{ fontWeight: 500 }}
                       >
                         {item.label}
