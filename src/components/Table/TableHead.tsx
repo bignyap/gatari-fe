@@ -1,76 +1,61 @@
+// components/Table/TableHead.tsx
 import * as React from 'react';
-import Box from '@mui/material/Box';
-import TableHead from '@mui/material/TableHead';
-import TableSortLabel from '@mui/material/TableSortLabel';
+import { TableHead, TableSortLabel, Box } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
 import { Order, Data, HeadCell, StyledTableCell, StickyTableCell, StickyTableRow } from './Utils';
 
-interface EnhancedTableProps {
-    onRequestSort: (event: React.MouseEvent<unknown>, property: keyof Data) => void;
-    order: Order;
-    orderBy: string;
-    headCells: readonly HeadCell[];
-    stickyColumnIds: string[];
-    stickyRight?: boolean;
+interface EnhancedTableHeadProps {
+  onRequestSort: (event: React.MouseEvent<unknown>, property: keyof Data) => void;
+  order: Order;
+  orderBy: string;
+  headCells: readonly HeadCell[];
+  stickyColumnIds: string[];
+  stickyRight?: boolean;
 }
-  
+
 export function EnhancedTableHead({
-  onRequestSort,
-  order,
-  orderBy,
-  headCells,
-  stickyColumnIds = [],
-  stickyRight = false,
-}: EnhancedTableProps) {
-  const createSortHandler =
-    (property: keyof Data) => (event: React.MouseEvent<unknown>) => {
-      onRequestSort(event, property);
+  onRequestSort, order, orderBy, headCells, stickyColumnIds, stickyRight,
+}: EnhancedTableHeadProps) {
+  const createSortHandler = (property: keyof Data) => (event: React.MouseEvent<unknown>) => {
+    onRequestSort(event, property);
   };
 
   return (
     <TableHead>
       <StickyTableRow>
         {headCells.map((headCell, index) => {
-          const TableCellComponent = stickyColumnIds.includes(headCell.id) ? StickyTableCell : StyledTableCell;
+          const Cell = stickyColumnIds.includes(headCell.id) ? StickyTableCell : StyledTableCell;
           return (
-            <TableCellComponent
+            <Cell
               key={headCell.id}
-              align='center'
+              align="center"
               sortDirection={orderBy === headCell.id ? order : false}
-              sx={{ 
-                padding: '8px', 
-                position: stickyColumnIds.includes(headCell.id) ? 'sticky' : 'static', 
-                left: stickyColumnIds.includes(headCell.id) ? index + 1 : 'auto', 
-                zIndex: stickyColumnIds.includes(headCell.id) ? 1 : 'auto' 
-              }}
+              sx={stickyColumnIds.includes(headCell.id)
+                ? { position: 'sticky', left: index + 1, zIndex: 3 }
+                : {}}
             >
               <TableSortLabel
                 active={orderBy === headCell.id}
                 direction={orderBy === headCell.id ? order : 'asc'}
                 onClick={createSortHandler(headCell.id)}
-                sx={{ fontWeight: '550' }}
               >
                 {headCell.label}
-                {orderBy === headCell.id ? (
+                {orderBy === headCell.id && (
                   <Box component="span" sx={visuallyHidden}>
                     {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
                   </Box>
-                ) : null}
+                )}
               </TableSortLabel>
-            </TableCellComponent>
+            </Cell>
           );
         })}
-        {
-          stickyRight && (
-            <StyledTableCell 
-              padding="checkbox" 
-              align='center'
-              sx={{ position: 'sticky', right: 0, zIndex: 1, width: '48px' }}
-            >
-              {/* Empty cell for alignment with menu */}
-            </StyledTableCell>
-          )
-        }
+        {stickyRight && (
+          <StyledTableCell
+            padding="checkbox"
+            align="center"
+            sx={{ position: 'sticky', right: 0, zIndex: 2, width: '48px' }}
+          />
+        )}
       </StickyTableRow>
     </TableHead>
   );

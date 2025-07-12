@@ -1,6 +1,6 @@
 import React from 'react';
 import TextField from '@mui/material/TextField';
-import GenericModal from '../../components/Modal/GenericModal';
+import GenericModal from './GenericModal';
 
 interface GenericModalProps {
   title: string;

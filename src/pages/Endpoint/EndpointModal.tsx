@@ -1,41 +1,53 @@
 import React from 'react';
 import { Modal, Box, Typography } from '@mui/material';
-import { CreateEndpoint } from '../../../libraries/Endpoint';
+import { CreateEndpoint } from '../../libraries/Endpoint';
 import EndpointForm from './EndpointForm';
 
 interface EndpointModalProps {
+  resourceTypeId: number;
+  resourceTypeName?: string; // Optional: if you want to show it in UI
   onClose: () => void;
   onEndpointCreated: (endpoint: any) => void;
 }
 
-const EndpointModal: React.FC<EndpointModalProps> = ({ onClose, onEndpointCreated }) => {
+const EndpointModal: React.FC<EndpointModalProps> = ({
+  resourceTypeId,
+  resourceTypeName,
+  onClose,
+  onEndpointCreated,
+}) => {
   const initialData = {
     name: '',
     description: '',
     httpMethod: 'GET',
     pathTemplate: '',
-    resourceTypeId: '',
-    resourceTypeName: '',
+    resourceTypeId: resourceTypeId,
+    resourceTypeName: resourceTypeName ?? '',
   };
 
   const handleSubmit = async (data: any) => {
-    const payload = {
-      name: data.name,
-      description: data.description,
-      http_method: data.httpMethod,
-      path_template: data.pathTemplate,
-      resource_type_id: data.resourceTypeId,
-    };
-  
-    const newEndpoint = await CreateEndpoint(payload);
+    try {
+      const payload = {
+        name: data.name,
+        description: data.description,
+        http_method: data.httpMethod,
+        path_template: data.pathTemplate,
+        resource_type_id: resourceTypeId,
+      };
 
-    const enrichedEndpoint = {
-      ...newEndpoint,
-      resource_type_name: data.resourceTypeName,
-    };
-  
-    onEndpointCreated(enrichedEndpoint);
-    onClose();
+      const newEndpoint = await CreateEndpoint(payload);
+
+      const enrichedEndpoint = {
+        ...newEndpoint,
+        resourceTypeName: resourceTypeName ?? '', // Optional display field
+      };
+
+      onEndpointCreated(enrichedEndpoint);
+      onClose();
+    } catch (error) {
+      console.error('Error creating endpoint:', error);
+      // Optionally add error toast handling here
+    }
   };
 
   return (
@@ -60,14 +72,11 @@ const EndpointModal: React.FC<EndpointModalProps> = ({ onClose, onEndpointCreate
           sx={{
             fontWeight: 600,
             mb: 3,
-            ml: -1,
             fontSize: '1.05rem',
-            pl: 1.5,
           }}
         >
           Register Endpoint
         </Typography>
-
 
         <EndpointForm
           initialData={initialData}
@@ -80,4 +89,3 @@ const EndpointModal: React.FC<EndpointModalProps> = ({ onClose, onEndpointCreate
 };
 
 export default EndpointModal;
-

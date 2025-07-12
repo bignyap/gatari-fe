@@ -1,6 +1,6 @@
 import React from 'react';
-import { CreatePermissionType } from '../../../libraries/PermissionType';
-import SettingsModal from '../Modal';
+import { CreatePermissionType } from '../../libraries/PermissionType';
+import SettingsModal from '../../components/Modal/SettingsModal';
 
 interface PermissionTypeFormProps {
   onClose: () => void;

@@ -14,10 +14,9 @@ import { HomePage } from './pages/Home/Home';
 import { OrganizationPage } from './pages/Organization/Organizations';
 import { PricingPage } from './pages/Pricing/Pricing';
 import { UsagePage } from './pages/Usage/Usage';
-import { SettingsPage } from './pages/Settings/Settings';
-import { EndpointTab } from './pages/Settings/Endpoint/Endpoint';
-import { ResourceTypeTab } from './pages/Settings/ResourceType/ResourceType';
-import { PermissionTypeTab } from './pages/Settings/PermissionType/PermissionType';
+// import { EndpointTab } from './pages/Settings/Endpoint/Endpoint';
+import { ResourcePage } from './pages/Resource/Resource';
+import { PermissionTypeTab } from './pages/Permission/Permission';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -32,12 +31,14 @@ const router = createBrowserRouter(
         <Route path="organizations" element={<OrganizationPage />} errorElement={<Error />} />
         <Route path="subTier" element={<PricingPage />} errorElement={<Error />} />
         <Route path="usage" element={<UsagePage />} errorElement={<Error />} />
-        <Route path="resources" element={<SettingsPage />} errorElement={<Error />}>
+        <Route path="resources" element={<ResourcePage />} errorElement={<Error />} />
+        <Route path="permissions" element={<PermissionTypeTab />} errorElement={<Error />} />
+        {/* <Route path="resources" element={<SettingsPage />} errorElement={<Error />}>
           <Route index element={<Navigate to="types" replace />} errorElement={<Error />} />
           <Route path="endpoints" element={<EndpointTab />} errorElement={<Error />} />
           <Route path="types" element={<ResourceTypeTab />} errorElement={<Error />} />
           <Route path="permissions" element={<PermissionTypeTab />} errorElement={<Error />} />
-        </Route>
+        </Route> */}
       </Route>,
       <Route path="*" element={<NotFound />} />
     </>

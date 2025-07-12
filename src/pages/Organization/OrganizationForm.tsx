@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
-import { 
-  Box, TextField, 
-  MenuItem, FormControl, 
-  Select, InputLabel, 
-  Tabs, Tab 
+import {
+  Box, TextField, MenuItem, FormControl,
+  Select, InputLabel, Tabs, Tab, Grid, SxProps, Theme
 } from '@mui/material';
 import OrganizationTypeSelect from './OrganizationTypeSelect';
 import ConfigEditor from './ConfigEditor';
 import { CustomizedSnackbars } from '../../components/Common/Toast';
-import { Grid, SxProps, Theme } from '@mui/material';
 import CommonButton from '../../components/Common/Button';
 
 interface OrganizationFormProps {
@@ -23,41 +20,34 @@ interface OrganizationFormProps {
 
 interface GridComponentInEditProps {
   value: React.ReactNode;
-  size: { xs: number; sm: number };
+  size: { xs: number; sm: number; md?: number };
   sx?: SxProps<Theme>;
 }
 
-export function GridComponentInEdit({
-  value,
-  size,
-  sx = {},
-}: GridComponentInEditProps) {
+export function GridComponentInEdit({ value, size, sx = {} }: GridComponentInEditProps) {
   return (
-    <Grid item xs={size.xs} sm={size.sm} sx={sx}>
+    <Grid item xs={size.xs} sm={size.sm} md={size.md} sx={sx}>
       {value}
     </Grid>
   );
 }
 
-const OrganizationForm: React.FC<OrganizationFormProps> = (
-  { 
-    initialData, onSubmit, onCancel, 
-    columns = 2, buttonAtTop = false, 
-    includeConfig = true,
-    disabled = false,
-  }
-) => {
+const OrganizationForm: React.FC<OrganizationFormProps> = ({
+  initialData, onSubmit, onCancel,
+  columns = 2, buttonAtTop = false,
+  includeConfig = true, disabled = false,
+}) => {
   const [formData, setFormData] = useState(initialData);
   const [snackbar, setSnackbar] = useState<{ message: string; status: string } | null>(null);
   const [activeTab, setActiveTab] = useState(0);
 
-  const handleTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+  const handleTabChange = (_: React.ChangeEvent<{}>, newValue: number) => {
     setActiveTab(newValue);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const target = e.target;
-    const { name, value, type, checked } = target as HTMLInputElement;
+    const target = e.target as HTMLInputElement;
+    const { name, value, type, checked } = target;
     setFormData({
       ...formData,
       [name]: type === 'checkbox' ? checked : value,
@@ -69,10 +59,12 @@ const OrganizationForm: React.FC<OrganizationFormProps> = (
     onSubmit(formData);
   };
 
-  const gridSize = columns === 3 ? { xs: 12, sm: 4 } : { xs: 12, sm: 6 };
+  const gridSize = columns === 3
+    ? { xs: 12, sm: 6, md: 4 }
+    : { xs: 12, sm: 12, md: 6 };
 
   return (
-    <>
+    <Box sx={{ px: { xs: 2, sm: 4 }, pt: 2 }}>
       {snackbar && (
         <CustomizedSnackbars
           message={snackbar.message}
@@ -84,24 +76,13 @@ const OrganizationForm: React.FC<OrganizationFormProps> = (
 
       {includeConfig && (
         <Tabs value={activeTab} onChange={handleTabChange} aria-label="organization form tabs">
-           <Tab label="Info" />
-           <Tab label="Configuration" />
+          <Tab label="Info" />
+          <Tab label="Configuration" />
         </Tabs>
       )}
 
       {activeTab === 0 && (
-        <Grid 
-          container 
-          spacing={2} 
-          justifyContent="flex-start" 
-          alignItems="flex-start" 
-          sx={{ 
-            minHeight: '100px', 
-            maxHeight: '300px', 
-            minWidth: '800px',
-            overflowY: 'auto' 
-          }}
-        >
+        <Grid container spacing={2}>
           <GridComponentInEdit value={
             <TextField
               fullWidth
@@ -114,6 +95,7 @@ const OrganizationForm: React.FC<OrganizationFormProps> = (
               disabled={disabled}
             />
           } size={gridSize} />
+
           <GridComponentInEdit value={
             <TextField
               fullWidth
@@ -126,6 +108,7 @@ const OrganizationForm: React.FC<OrganizationFormProps> = (
               disabled={disabled}
             />
           } size={gridSize} />
+
           <GridComponentInEdit value={
             <OrganizationTypeSelect
               value={formData.type_id}
@@ -133,6 +116,7 @@ const OrganizationForm: React.FC<OrganizationFormProps> = (
               disabled={disabled}
             />
           } size={gridSize} />
+
           <GridComponentInEdit value={
             <TextField
               fullWidth
@@ -144,6 +128,7 @@ const OrganizationForm: React.FC<OrganizationFormProps> = (
               disabled={disabled}
             />
           } size={gridSize} />
+
           <GridComponentInEdit value={
             <TextField
               fullWidth
@@ -156,6 +141,7 @@ const OrganizationForm: React.FC<OrganizationFormProps> = (
               disabled={disabled}
             />
           } size={gridSize} />
+
           <GridComponentInEdit value={
             <FormControl fullWidth margin="normal" disabled={disabled}>
               <InputLabel>Status</InputLabel>
@@ -163,13 +149,14 @@ const OrganizationForm: React.FC<OrganizationFormProps> = (
                 name="active"
                 value={formData.active ? 'true' : 'false'}
                 onChange={(e) => setFormData({ ...formData, active: e.target.value === 'true' })}
-                label="Active"
+                label="Status"
               >
                 <MenuItem value="true">Active</MenuItem>
                 <MenuItem value="false">Inactive</MenuItem>
               </Select>
             </FormControl>
           } size={gridSize} />
+
           <GridComponentInEdit value={
             <FormControl fullWidth margin="normal" disabled={disabled}>
               <InputLabel>Reporting</InputLabel>
@@ -188,20 +175,7 @@ const OrganizationForm: React.FC<OrganizationFormProps> = (
       )}
 
       {activeTab === 1 && includeConfig && (
-        <Grid
-          container
-          spacing={0}
-          justifyContent="flex-start"
-          alignItems="flex-start"
-          sx={{
-            mb: 2,
-            minWidth: '800px',
-            background: 'none',
-            border: 'none',
-            boxShadow: 'none',
-            padding: 0,
-          }}
-        >
+        <Grid container spacing={0}>
           <GridComponentInEdit
             value={
               <ConfigEditor
@@ -226,7 +200,7 @@ const OrganizationForm: React.FC<OrganizationFormProps> = (
       )}
 
       {!buttonAtTop && !disabled && (
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2, ml: 'auto' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
           <CommonButton
             label="Create"
             type="submit"
@@ -243,7 +217,7 @@ const OrganizationForm: React.FC<OrganizationFormProps> = (
           />
         </Box>
       )}
-    </>
+    </Box>
   );
 };
 

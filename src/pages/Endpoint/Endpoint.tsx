@@ -1,36 +1,51 @@
 import { useEffect, useState } from 'react';
-import { ListEndpoints } from '../../../libraries/Endpoint';
-import CircularProgress from '@mui/material/CircularProgress';
-import { EnhancedTable } from '../../../components/Table/Table';
-import { HeadCell } from '../../../components/Table/Utils';
+import {
+  Box,
+  CircularProgress,
+  TextField,
+  InputAdornment,
+  Typography,
+} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { CustomizedSnackbars } from '../../../components/Common/Toast';
-import EndpointModal from './EndpointModal';
-import CommonButton from '../../../components/Common/Button';
-import { Box, TextField, InputAdornment } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 
-export function EndpointTab() {
+import { ListEndpointsByResourceType } from '../../libraries/Endpoint';
+import { EnhancedTable } from '../../components/Table/Table';
+import { HeadCell } from '../../components/Table/Utils';
+import CommonButton from '../../components/Common/Button';
+import EndpointModal from './EndpointModal';
+import { CustomizedSnackbars } from '../../components/Common/Toast';
+
+interface ViewEndpointsProps {
+  resourceId: number;
+}
+
+export default function ViewEndpoints({ resourceId }: ViewEndpointsProps) {
   return (
-    <div>
-      <EndpointLoader />
-    </div>
+    <Box>
+      <EndpointLoader resourceTypeId={resourceId} />
+    </Box>
   );
 }
 
-export function EndpointLoader() {
+interface EndpointLoaderProps {
+  resourceTypeId: number;
+}
+
+function EndpointLoader({ resourceTypeId }: EndpointLoaderProps) {
   const [endpoints, setEndpoints] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [snackbar, setSnackbar] = useState<{ message: string; status: string } | null>(null);
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
+  const [searchText, setSearchText] = useState<string>('');
 
-  const fetchEndpoints = async (pageNumber: number, limit: number) => {
+  const fetchEndpoints = async () => {
     setLoading(true);
     try {
-      const endpointData = await ListEndpoints(pageNumber + 1, limit); // +1 if backend is 1-indexed
-      setEndpoints(endpointData);
+      const data = await ListEndpointsByResourceType(resourceTypeId);
+      setEndpoints(data || []);
     } catch (error) {
       console.error('Error fetching endpoints:', error);
       setSnackbar({
@@ -43,27 +58,33 @@ export function EndpointLoader() {
   };
 
   useEffect(() => {
-    fetchEndpoints(page, rowsPerPage);
-  }, [page, rowsPerPage]);
+    fetchEndpoints();
+  }, [resourceTypeId]);
 
-  const handleCreateEndpoint = () => {
-    setIsModalOpen(true);
-  };
+  const handleCreateEndpoint = () => setIsModalOpen(true);
 
   const handleEndpointCreated = (newEndpoint: any) => {
-    setEndpoints((prev) => [...prev, {
-      id: newEndpoint.id,
-      name: newEndpoint.name,
-      description: newEndpoint.description,
-      httpMethod: newEndpoint.http_method,
-      pathTemplate: newEndpoint.path_template,
-      resourceTypeId: newEndpoint.resource_type_id,
-      resourceTypeName: newEndpoint.resource_type_name,
-    }]);
+    setEndpoints((prev) => [
+      ...prev,
+      {
+        id: newEndpoint.id,
+        name: newEndpoint.name,
+        description: newEndpoint.description,
+        httpMethod: newEndpoint.http_method,
+        pathTemplate: newEndpoint.path_template,
+        resourceTypeId: newEndpoint.resource_type_id,
+        resourceTypeName: newEndpoint.resource_type_name,
+      },
+    ]);
   };
 
+  const filteredEndpoints = endpoints.filter((ep) =>
+    ep.name.toLowerCase().includes(searchText.toLowerCase()) ||
+    ep.pathTemplate.toLowerCase().includes(searchText.toLowerCase())
+  );
+
   return (
-    <div>
+    <Box>
       {snackbar && (
         <CustomizedSnackbars
           message={snackbar.message}
@@ -72,19 +93,23 @@ export function EndpointLoader() {
           onClose={() => setSnackbar(null)}
         />
       )}
+
       {loading ? (
-        <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+        <Box display="flex" justifyContent="center" alignItems="center" height="300px">
           <CircularProgress />
         </Box>
       ) : (
         <EnhancedTable
-          rows={endpoints}
+          rows={filteredEndpoints.slice(
+            page * rowsPerPage,
+            page * rowsPerPage + rowsPerPage
+          )}
           headCells={headCells}
           defaultSort="id"
           defaultRows={rowsPerPage}
           stickyColumnIds={[]}
           tableContainerSx={{
-            maxHeight: '50vh',
+            maxHeight: '55vh',
             overflowX: 'auto',
             overflowY: 'auto',
           }}
@@ -92,16 +117,18 @@ export function EndpointLoader() {
             <Box
               sx={{
                 display: 'flex',
-                gap: '10px',
+                gap: 2,
                 justifyContent: 'space-between',
                 alignItems: 'center',
               }}
             >
               <TextField
                 variant="outlined"
-                placeholder="Search..."
+                placeholder="Search endpoints..."
                 size="small"
-                style={{ width: '400px' }}
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                sx={{ width: '400px' }}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -112,31 +139,30 @@ export function EndpointLoader() {
               />
               <CommonButton
                 label="CREATE ENDPOINT"
-                component="label"
-                role={undefined}
                 variant="contained"
-                tabIndex={-1}
                 startIcon={<AddIcon />}
                 onClick={handleCreateEndpoint}
               />
             </Box>
           }
           page={page}
-          count={-1} // Set actual count if available
-          onPageChange={(newPage) => setPage(newPage)}
-          onRowsPerPageChange={(newRowsPerPage: number) => {
+          count={filteredEndpoints.length}
+          onPageChange={setPage}
+          onRowsPerPageChange={(newRowsPerPage) => {
             setRowsPerPage(newRowsPerPage);
             setPage(0);
           }}
         />
       )}
+
       {isModalOpen && (
         <EndpointModal
+          resourceTypeId={resourceTypeId}
           onClose={() => setIsModalOpen(false)}
           onEndpointCreated={handleEndpointCreated}
         />
       )}
-    </div>
+    </Box>
   );
 }
 
@@ -145,5 +171,5 @@ const headCells: HeadCell[] = [
   { id: 'description', label: 'Description' },
   { id: 'httpMethod', label: 'HTTP Method' },
   { id: 'pathTemplate', label: 'Path Template' },
-  { id: 'resourceTypeName', label: 'Resource Type' },
+  // { id: 'resourceTypeName', label: 'Resource Type' },
 ];

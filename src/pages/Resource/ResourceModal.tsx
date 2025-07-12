@@ -1,6 +1,6 @@
 import React from 'react';
-import { CreateResourceType } from '../../../libraries/ResourceType';
-import SettingsModal from '../Modal';
+import { CreateResourceType } from '../../libraries/ResourceType';
+import SettingsModal from '../../components/Modal/SettingsModal';
 
 interface ResourceTypeFormProps {
   onClose: () => void;

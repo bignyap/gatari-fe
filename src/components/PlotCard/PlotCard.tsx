@@ -1,16 +1,14 @@
 // components/PlotCard.tsx
-import React from "react";
+import React, { ReactNode } from "react";
 import { Paper, Typography, Box } from "@mui/material";
 
-export default function PlotCard({
-  title,
-  height = 300,
-  children,
-}: {
-  title?: string; // <-- made optional
+interface PlotCardProps {
+  title?: ReactNode; // ✅ Accept string or JSX (Box, ToggleButtonGroup, etc.)
   height?: number;
-  children: React.ReactNode;
-}) {
+  children: ReactNode;
+}
+
+export default function PlotCard({ title, height = 300, children }: PlotCardProps) {
   return (
     <Paper
       elevation={0}
@@ -28,15 +26,20 @@ export default function PlotCard({
       }}
     >
       {title && (
-        <Typography
-          variant="subtitle1"
-          fontWeight={700}
-          color="text.primary"
-          mb={2}
-          sx={{ textTransform: "capitalize", letterSpacing: 0.3 }}
-        >
-          {title}
-        </Typography>
+        <Box mb={2}>
+          {typeof title === "string" ? (
+            <Typography
+              variant="subtitle1"
+              fontWeight={700}
+              color="text.primary"
+              sx={{ textTransform: "capitalize", letterSpacing: 0.3 }}
+            >
+              {title}
+            </Typography>
+          ) : (
+            title // JSX content (Box, Typography + Toggle, etc.)
+          )}
+        </Box>
       )}
 
       <Box

@@ -86,8 +86,7 @@ export function UsagePage() {
       <Box
         sx={{
           marginLeft: `${sidebarWidth}px`,
-          marginTop: "64px", // to avoid overlapping with navbar
-          padding: 3,
+          padding: 0,
           display: "flex",
           justifyContent: "center",
           alignItems: "start", // Ensure top alignment

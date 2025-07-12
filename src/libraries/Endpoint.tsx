@@ -20,7 +20,17 @@ export async function ListEndpoints(pageNumber: number, itemsPerPage: number): P
     const endpoints = await GetData(getEndpointUrl(), queryParams);
     
     return endpoints.map((endpoint: any) => createEndpointData(endpoint));
-  }
+}
+
+export async function ListEndpointsByResourceType(resourcetTypeId: number): Promise<any> {
+  const queryParams = {
+    resource_type_id: resourcetTypeId.toString()
+  };
+
+  const endpoints = await GetData(getEndpointUrl(), queryParams);
+  
+  return endpoints.map((endpoint: any) => createEndpointData(endpoint));
+}
 
 export async function DeleteEndpoint(id: string): Promise<void> {
   await DeleteData(`${getEndpointUrl()}/${id}`);

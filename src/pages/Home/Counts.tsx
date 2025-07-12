@@ -75,19 +75,19 @@ export default function CountPage() {
       label: "Resource Types",
       total: dashboardCounts.resource_type_count || 0,
       icon: <CategoryIcon />,
-      route: "/resources/types",
+      route: "/resources",
     },
     {
       label: "API Endpoints",
       total: dashboardCounts.api_endpoint_count || 0,
       icon: <ApiIcon />,
-      route: "/resources/endpoints",
+      route: "/resources",
     },
     {
       label: "Permission Types",
       total: dashboardCounts.permission_type_count || 0,
       icon: <LockIcon />,
-      route: "/resources/permissions",
+      route: "/permissions",
     },
   ];
 

@@ -4,10 +4,10 @@ import {
   FormControl, Box, CircularProgress
 } from '@mui/material';
 import { SelectChangeEvent } from '@mui/material/Select';
-import CommonButton from '../../../components/Common/Button';
-import { GridComponentInEdit } from '../../Organization/OrganizationForm';
-import { ListAllResourceTypes } from '../../../libraries/ResourceType';
-import { CustomizedSnackbars } from '../../../components/Common/Toast';
+import CommonButton from '../../components/Common/Button';
+import { GridComponentInEdit } from '../Organization/OrganizationForm';
+import { ListAllResourceTypes } from '../../libraries/ResourceType';
+import { CustomizedSnackbars } from '../../components/Common/Toast';
 
 interface EndpointFormProps {
   initialData: EndpointData;

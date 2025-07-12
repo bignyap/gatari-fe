@@ -8,19 +8,28 @@ import DesktopMenu from './DesktopMenu';
 
 import '../../App.css';
 
-const pages = [
+interface Page {
+  name: string;
+  link: string;
+  children?: Page[];
+}
+
+const pages: Page[] = [
   { name: 'Organizations', link: '/organizations' },
-  { name: 'Subscription Tiers', link: '/subTier' },
-  {
-    name: 'Resources',
-    link: '/resources',
-    children: [
-      { name: 'Permissions', link: '/resources/permissions' },
-      { name: 'Resources', link: '/resources/types' },
-      { name: 'Endpoints', link: '/resources/endpoints' },
-    ],
-  },
+  { name: 'Subscriptions', link: '/subTier' },
+  { name: 'Resources', link: '/resources' },
+  { name: 'Permissions', link: '/permissions' },
   { name: 'Usage', link: '/usage' },
+
+  // Example of nested pages if needed in future:
+  // {
+  //   name: 'Resources',
+  //   link: '/resources',
+  //   children: [
+  //     { name: 'Types', link: '/resources/types' },
+  //     { name: 'Endpoints', link: '/resources/endpoints' },
+  //   ]
+  // }
 ];
 
 interface NavbarProps {
@@ -40,11 +49,10 @@ export default function Navbar({ title }: NavbarProps) {
       page.children?.some((sub) => sub.link === currentPath)
     );
 
-    const child = parent?.children?.find((sub) => sub.link === currentPath);
-
-    if (child) {
-      setSelectedPage(child.name);
-      setSelectedParentPage(parent?.name || '');
+    if (parent && parent.children) {
+      const child = parent.children.find((sub) => sub.link === currentPath);
+      setSelectedPage(child?.name || '');
+      setSelectedParentPage(parent.name);
     } else {
       const page = pages.find((p) => p.link === currentPath);
       setSelectedPage(page?.name || '');
@@ -75,7 +83,7 @@ export default function Navbar({ title }: NavbarProps) {
       className="main--content"
       sx={{
         minHeight: '100vh',
-        bgcolor: (theme) => theme.palette.background?.default || '#f7f9fc',
+        bgcolor: (theme) => theme.palette.background.default || '#f7f9fc',
         display: 'flex',
         flexDirection: 'column',
       }}
@@ -143,7 +151,7 @@ export default function Navbar({ title }: NavbarProps) {
             flexGrow: 1,
             mx: 'auto',
             px: { xs: 2, sm: 3 },
-            minHeight: 'calc(100vh - 64px)', // or just height: '100%'
+            minHeight: 'calc(100vh - 64px)',
           }}
         >
           <Outlet />

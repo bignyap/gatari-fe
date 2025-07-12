@@ -1,7 +1,7 @@
 import {
   ResponsiveContainer,
-  LineChart,
-  Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -11,7 +11,6 @@ import PlotCard from "../../components/PlotCard/PlotCard";
 import { CHART_COLORS } from "../../constants/colors";
 
 export default function UsageCostPerCallPlot({ res }: { res: any[] }) {
-  // Compute chart data directly from res
   const merged: Record<string, { total_calls: number; total_cost: number }> = {};
   res.forEach(({ endpoint_name, total_calls, total_cost }: any) => {
     if (!merged[endpoint_name]) {
@@ -31,7 +30,7 @@ export default function UsageCostPerCallPlot({ res }: { res: any[] }) {
   return (
     <PlotCard title="Cost Per Call by Endpoint">
       <ResponsiveContainer width="100%" height={400}>
-        <LineChart data={data}>
+        <BarChart data={data} margin={{ top: 10, right: 20, left: 10, bottom: 80 }}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis
             dataKey="endpoint_name"
@@ -71,15 +70,13 @@ export default function UsageCostPerCallPlot({ res }: { res: any[] }) {
               );
             }}
           />
-          <Line
-            type="monotone"
+          <Bar
             dataKey="cost_per_call"
-            stroke={CHART_COLORS.line}
-            strokeWidth={3}
-            dot={{ r: 4 }}
+            fill={CHART_COLORS.bar}
             name="Cost per Call"
+            radius={[6, 6, 0, 0]}
           />
-        </LineChart>
+        </BarChart>
       </ResponsiveContainer>
     </PlotCard>
   );

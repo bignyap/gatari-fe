@@ -1,32 +1,49 @@
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
+import { Toolbar, Typography, Box } from '@mui/material';
 
-export function EnhancedTableToolbar({ title }: { title: React.ReactNode }) {
+interface EnhancedTableToolbarProps {
+  title: React.ReactNode;
+  actions?: React.ReactNode;
+}
+
+export function EnhancedTableToolbar({ title, actions }: EnhancedTableToolbarProps) {
   return (
     <Toolbar
       sx={{
-        backdropFilter: 'none',
-        WebkitBackdropFilter: 'none',
         backgroundColor: 'transparent',
-        color: 'inherit',
-        minHeight: '48px !important',
         px: { sm: 2, xs: 1 },
+        minHeight: 48,
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 1,
       }}
     >
       <Typography
+        variant="h6"
         sx={{
-          width: '100%',
-          textAlign: 'center',
           fontWeight: 600,
           fontSize: '1rem',
           fontFamily: 'Inter, Roboto, system-ui, sans-serif',
+          whiteSpace: 'nowrap',
         }}
-        variant="h6"
-        id="tableTitle"
         component="div"
       >
         {title}
       </Typography>
+
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          flexWrap: { xs: 'wrap', sm: 'nowrap' },
+          width: { xs: '100%', sm: 'auto' },
+          justifyContent: { xs: 'flex-start', sm: 'flex-end' },
+        }}
+      >
+        {actions}
+      </Box>
     </Toolbar>
   );
 }

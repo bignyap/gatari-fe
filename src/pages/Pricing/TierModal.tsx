@@ -1,6 +1,6 @@
 import React from 'react';
 import { CreateSubscriptionTier } from '../../libraries/SubscriptionTier';
-import SettingsModal from '../Settings/Modal';
+import SettingsModal from '../../components/Modal/SettingsModal';
 
 interface TierFormProps {
   onClose: () => void;

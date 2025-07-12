@@ -1,19 +1,32 @@
 import React from 'react';
-import { Button, ButtonProps } from '@mui/material';
+import {
+  Button,
+  ButtonProps,
+  Tooltip,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material';
 import { styled } from '@mui/material/styles';
 
 const StyledButton = styled(Button, {
   shouldForwardProp: (prop) => prop !== 'useTeal',
 })<{ useTeal?: boolean }>(({ theme, useTeal }) => ({
-  textTransform: 'uppercase',
-  fontWeight: 500,
-  fontSize: '0.78rem',
   minHeight: 32,
-  padding: theme.spacing(0.7, 1.8),
+  minWidth: 36,
+  padding: theme.spacing(0.8, 1.6),
   borderRadius: 6,
-  transition: 'all 0.2s ease-in-out',
+  fontSize: '0.78rem',
+  fontWeight: 500,
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing(1),
+  textTransform: 'uppercase',
   backdropFilter: 'blur(10px)',
   WebkitBackdropFilter: 'blur(10px)',
+  whiteSpace: 'nowrap',         // 🔒 prevent wrapping
+  overflow: 'hidden',           // 🔒 hide overflow
+  textOverflow: 'ellipsis',     // 🔒 add '...'
+
   ...(useTeal
     ? {
         backgroundColor: 'rgba(0, 137, 123, 0.15)',
@@ -52,7 +65,10 @@ const CommonButton = <C extends React.ElementType = 'button'>({
   useTeal,
   ...rest
 }: CommonButtonProps<C>) => {
-  return (
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const buttonContent = (
     <StyledButton
       component={component}
       role={component === 'label' ? undefined : 'button'}
@@ -60,10 +76,19 @@ const CommonButton = <C extends React.ElementType = 'button'>({
       size="small"
       tabIndex={-1}
       useTeal={useTeal}
+      title={isMobile ? undefined : label} // fallback tooltip for truncated text
       {...rest}
     >
-      {label}
+      {!isMobile && label}
     </StyledButton>
+  );
+
+  return isMobile ? (
+    <Tooltip title={label}>
+      <span>{buttonContent}</span>
+    </Tooltip>
+  ) : (
+    buttonContent
   );
 };
 
