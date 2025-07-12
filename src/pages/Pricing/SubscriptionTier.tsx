@@ -14,14 +14,11 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useSearchParams } from 'react-router-dom';
+
 import { ListSubscriptionTiers } from '../../libraries/SubscriptionTier';
 import TierModal from './TierModal';
 import { CustomizedSnackbars } from '../../components/Common/Toast';
 import TierPricingView from './ViewPricing';
-
-export function SubScriptionTierTab() {
-  return <SubScriptionTierLoader />;
-}
 
 export function SubScriptionTierLoader() {
   const [tiers, setTiers] = useState<any[]>([]);
@@ -35,22 +32,23 @@ export function SubScriptionTierLoader() {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'), { noSsr: true });
 
   useEffect(() => {
-    async function fetchTiers() {
-      try {
-        const res = await ListSubscriptionTiers(1, 100);
-        setTiers(res.data || []);
-        if (!selectedTierId && res.data?.length > 0) {
-          setSearchParams({ id: String(res.data[0].id) });
-        }
-      } catch (err) {
-        setSnackbar({ message: 'Failed to load tiers.', status: 'error' });
-      } finally {
-        setLoading(false);
-      }
-    }
-
     fetchTiers();
   }, []);
+
+  async function fetchTiers() {
+    try {
+      const res = await ListSubscriptionTiers(1, 100);
+      const tierList = res.data || [];
+      setTiers(tierList);
+      if (!selectedTierId && tierList.length > 0) {
+        setSearchParams({ id: String(tierList[0].id) });
+      }
+    } catch (err) {
+      setSnackbar({ message: 'Failed to load tiers.', status: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const handleTierSelect = (id: string) => {
     setSearchParams({ id });
@@ -74,14 +72,13 @@ export function SubScriptionTierLoader() {
           width: 320,
           flexShrink: 0,
           height: '100%',
-          borderRight: isMobile ? 'none' : '1px solid #ddd',
-          borderBottom: isMobile ? '1px solid #ddd' : 'none',
           flexDirection: 'column',
           backgroundColor: '#fafafa',
-          transition: 'all 0.3s ease',
+          borderRight: isMobile ? 'none' : '1px solid #ddd',
+          borderBottom: isMobile ? '1px solid #ddd' : 'none',
         }}
       >
-        {/* Sticky Header */}
+        {/* Header */}
         <Box
           sx={{
             px: 2,
@@ -93,30 +90,27 @@ export function SubScriptionTierLoader() {
             bgcolor: '#fafafa',
           }}
         >
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <ListItemButton
-              onClick={() => setIsModalOpen(true)}
-              sx={{
-                borderRadius: 1,
-                px: 2,
-                py: 1,
-                bgcolor: 'grey.100',
-                '&:hover': { bgcolor: 'grey.200' },
-              }}
-            >
-              <AddIcon fontSize="small" sx={{ mr: 1 }} />
-              <ListItemText
-                primary="Create Subscription Tier"
-                primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 500 }}
-              />
-            </ListItemButton>
-          </Box>
-
+          <ListItemButton
+            onClick={() => setIsModalOpen(true)}
+            sx={{
+              borderRadius: 1,
+              px: 2,
+              py: 1,
+              bgcolor: 'grey.100',
+              '&:hover': { bgcolor: 'grey.200' },
+            }}
+          >
+            <AddIcon fontSize="small" sx={{ mr: 1 }} />
+            <ListItemText
+              primary="Create Subscription Tier"
+              primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 500 }}
+            />
+          </ListItemButton>
           <Divider sx={{ mt: 2 }} />
         </Box>
 
-        {/* Scrollable List */}
-        <Box sx={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
+        {/* List */}
+        <Box sx={{ flex: 1, overflowY: 'auto' }}>
           {loading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
               <CircularProgress />
@@ -145,7 +139,7 @@ export function SubScriptionTierLoader() {
             height: '100%',
             overflowY: 'auto',
             backgroundColor: '#f5f5f5',
-            p: isMobile ? 2 : 2,
+            p: 2,
           }}
         >
           {isMobile && selectedTierId && (
@@ -158,19 +152,19 @@ export function SubScriptionTierLoader() {
             <TierPricingView tierId={Number(selectedTierId)} />
           ) : (
             !isMobile && (
-              <Typography variant="h6">Select a tier to view pricing</Typography>
+              <Typography variant="h6">Select a subscription tier to view pricing</Typography>
             )
           )}
         </Box>
       )}
 
-      {/* Modals */}
+      {/* Modal */}
       {isModalOpen && (
         <TierModal
           onClose={() => setIsModalOpen(false)}
           onTierCreated={() => {
             setIsModalOpen(false);
-            window.location.reload();
+            fetchTiers(); // Refresh instead of reload
           }}
         />
       )}
@@ -180,7 +174,7 @@ export function SubScriptionTierLoader() {
         <CustomizedSnackbars
           message={snackbar.message}
           status={snackbar.status}
-          open={true}
+          open
           onClose={() => setSnackbar(null)}
         />
       )}

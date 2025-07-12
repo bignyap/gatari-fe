@@ -54,42 +54,61 @@ export default function CountPage() {
       label: "Organizations",
       total: dashboardCounts.organization_count || 0,
       active: dashboardCounts.active_organization_count || 0,
-      icon: <DomainIcon />,
+      icon: (
+        <DomainIcon sx={{ color: "#1e88e5" }} />
+      ),
+      iconBg: "#e3f2fd",
       route: "/organizations",
     },
     {
       label: "Subscriptions",
       total: dashboardCounts.subscription_count || 0,
       active: dashboardCounts.active_subscription_count || 0,
-      icon: <ListAltIcon />,
+      icon: (
+        <ListAltIcon sx={{ color: "#43a047" }} />
+      ),
+      iconBg: "#e8f5e9",
       route: "/subTier",
     },
     {
       label: "Subscription Tiers",
       total: dashboardCounts.subscription_tier_count || 0,
       active: dashboardCounts.active_subscription_tier_count || 0,
-      icon: <LayersIcon />,
+      icon: (
+        <LayersIcon sx={{ color: "#8e24aa" }} />
+      ),
+      iconBg: "#f3e5f5",
       route: "/subTier",
     },
     {
       label: "Resource Types",
       total: dashboardCounts.resource_type_count || 0,
-      icon: <CategoryIcon />,
+      icon: (
+        <CategoryIcon sx={{ color: "#fb8c00" }} />
+      ),
+      iconBg: "#fff3e0",
       route: "/resources",
     },
     {
       label: "API Endpoints",
       total: dashboardCounts.api_endpoint_count || 0,
-      icon: <ApiIcon />,
+      icon: (
+        <ApiIcon sx={{ color: "#6d4c41" }} />
+      ),
+      iconBg: "#efebe9",
       route: "/resources",
     },
     {
       label: "Permission Types",
       total: dashboardCounts.permission_type_count || 0,
-      icon: <LockIcon />,
+      icon: (
+        <LockIcon sx={{ color: "#c62828" }} />
+      ),
+      iconBg: "#ffebee",
       route: "/permissions",
     },
   ];
+  
 
   const totalPages = Math.ceil(groupedItems.length / ITEMS_PER_PAGE);
   const paginatedItems = groupedItems.slice(
@@ -214,17 +233,17 @@ export default function CountPage() {
                   >
                     <Box
                       sx={{
-                        background: "rgba(255, 255, 255, 0.15)",
-                        backdropFilter: "blur(6px)",
+                        backgroundColor: item.iconBg || "rgba(255, 255, 255, 0.15)",
                         borderRadius: "50%",
-                        padding: 1,
+                        padding: 1.2,
                         boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-                        color: theme.palette.primary.main,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                       }}
                     >
                       {item.icon}
                     </Box>
-
                     <Typography
                       variant="h6"
                       fontWeight="bold"

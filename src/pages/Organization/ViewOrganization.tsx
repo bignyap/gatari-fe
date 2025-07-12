@@ -212,7 +212,7 @@ function ViewOrganizationLoader({ navigate, orgId }: { navigate: (path: string) 
               {organization && (
                 <Box sx={{ width: '100%', overflowX: 'auto' }}>
                   <SubscriptionLoader
-                    orgId={Number(id)}
+                    orgId={orgId}
                     subInitName={organization.name}
                     tableContainerSx={{
                       width: '100%',
