@@ -15,4 +15,5 @@ export const API_PATHS = {
   tierPricing: '/tierPricing',
   orgPermission: '/orgPermission',
   apiUsageSummary: '/apiUsageSummary',
+  dashboard: '/dashboard',
 };
