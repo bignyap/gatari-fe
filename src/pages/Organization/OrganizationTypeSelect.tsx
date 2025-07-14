@@ -50,7 +50,7 @@ const OrganizationTypeSelect: React.FC<OrganizationTypeSelectProps> = ({ value, 
       )}
       <TextField
         fullWidth
-        margin="normal"
+        size="medium"
         name="type_id"
         label="Organization Type"
         select

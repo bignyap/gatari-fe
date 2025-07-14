@@ -1,28 +1,47 @@
 import React from 'react';
-import TextField from '@mui/material/TextField';
+import { TextField } from '@mui/material';
 import GenericModal from './GenericModal';
 
-interface GenericModalProps {
+export interface ModalField {
+  name: string;
+  label: string;
+  type?: string;
+  placeholder?: string;
+  required?: boolean;
+}
+
+interface SettingsModalProps {
   title: string;
-  fields: { name: string; label: string; required?: boolean }[];
+  fields: ModalField[];
   onClose: () => void;
   onSubmit: (formData: Record<string, any>) => Promise<any>;
   onSuccess: (result: any) => void;
 }
 
-const SettingsModal: React.FC<GenericModalProps> = ({ title, fields, onClose, onSubmit, onSuccess }) => {
-  const renderFields = (formData: Record<string, any>, handleChange: (e: React.ChangeEvent<any>) => void) => (
+const SettingsModal: React.FC<SettingsModalProps> = ({
+  title,
+  fields,
+  onClose,
+  onSubmit,
+  onSuccess,
+}) => {
+  const renderFields = (
+    formData: Record<string, any>,
+    handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  ) => (
     <>
-      {fields.map((field) => (
+      {fields.map(({ name, label, required, type = 'text', placeholder }) => (
         <TextField
-          key={field.name}
+          key={name}
           fullWidth
           margin="normal"
-          name={field.name}
-          label={field.label}
-          value={formData[field.name] || ''}
+          name={name}
+          label={label}
+          value={formData[name] || ''}
           onChange={handleChange}
-          required={field.required}
+          required={required}
+          type={type}
+          placeholder={placeholder}
         />
       ))}
     </>

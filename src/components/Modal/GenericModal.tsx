@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
-import Modal from '@mui/material/Modal';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
+import {
+  Modal,
+  Box,
+  IconButton,
+  Typography,
+  useMediaQuery,
+  useTheme,
+  Divider,
+} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import CommonButton from '../Common/Button';
 
 interface GenericModalProps {
@@ -23,6 +30,8 @@ const GenericModal: React.FC<GenericModalProps> = ({
   onSuccess,
 }) => {
   const [formData, setFormData] = useState<Record<string, any>>({});
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const handleChange = (e: React.ChangeEvent<any>) => {
     const { name, value } = e.target;
@@ -36,7 +45,7 @@ const GenericModal: React.FC<GenericModalProps> = ({
       onSuccess(result);
       onClose();
     } catch (error) {
-      console.error(`Error creating ${title.toLowerCase()}:`, error);
+      console.error(`Error submitting ${title.toLowerCase()}:`, error);
     }
   };
 
@@ -48,29 +57,35 @@ const GenericModal: React.FC<GenericModalProps> = ({
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: 420,
-          bgcolor: '#fff',
-          borderRadius: 4,
-          boxShadow: 6,
-          p: 4,
-          pt: 3,
-          border: '1px solid #e0e0e0',
+          width: isMobile ? '90%' : 460,
+          bgcolor: 'background.paper',
+          borderRadius: 2,
+          boxShadow: 24,
+          p: 0,
+          overflow: 'hidden',
         }}
       >
-        <Typography
-          variant="subtitle1"
+        <Box
           sx={{
-            fontWeight: 600,
-            mb: 3,
-            ml: -1,
-            fontSize: '1.05rem',
-            pl: 1.5,
+            px: 3,
+            py: 2,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderBottom: '1px solid #eee',
           }}
         >
-          {title}
-        </Typography>
+          <Typography variant="subtitle1">{title}</Typography>
+          <IconButton onClick={onClose} size="small">
+            <CloseIcon />
+          </IconButton>
+        </Box>
 
-        <form onSubmit={handleSubmit}>
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          sx={{ px: 3, py: 3 }}
+        >
           {renderFields(formData, handleChange)}
 
           <Box
@@ -78,7 +93,7 @@ const GenericModal: React.FC<GenericModalProps> = ({
               display: 'flex',
               justifyContent: 'flex-end',
               gap: 2,
-              mt: 4,
+              mt: 3,
             }}
           >
             <CommonButton
@@ -94,7 +109,7 @@ const GenericModal: React.FC<GenericModalProps> = ({
               sx={{ minWidth: 100 }}
             />
           </Box>
-        </form>
+        </Box>
       </Box>
     </Modal>
   );
