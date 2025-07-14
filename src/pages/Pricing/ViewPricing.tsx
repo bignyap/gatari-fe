@@ -1,10 +1,10 @@
-// TierPricingView.tsx
 import { useEffect, useState } from "react";
 import {
   Box,
   CircularProgress,
   TextField,
   InputAdornment,
+  Typography,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { EnhancedTable } from "../../components/Table/Table";
@@ -23,6 +23,7 @@ export default function TierPricingView({ tierId }: { tierId: number }) {
   const [snackbar, setSnackbar] = useState<{ message: string; status: string } | null>(null);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
   const [page, setPage] = useState<number>(0);
+  const [search, setSearch] = useState("");
 
   async function fetchTierPricing(newPage: number, perPage: number) {
     try {
@@ -60,6 +61,10 @@ export default function TierPricingView({ tierId }: { tierId: number }) {
     { id: "base_rate_limit", label: "Rate Limit / Sec" },
   ];
 
+  const filteredRows = tierPricing.filter((row) =>
+    row.endpoint_name?.toLowerCase().includes(search.toLowerCase())
+  );
+
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" height="100%">
@@ -79,47 +84,56 @@ export default function TierPricingView({ tierId }: { tierId: number }) {
         />
       )}
 
-      <EnhancedTable
-        rows={tierPricing}
-        renderCell={(key, value) => FormatCellValue(value)}
-        headCells={headCells}
-        defaultSort="id"
-        defaultRows={10}
-        page={page}
-        count={count}
-        onPageChange={(p) => setPage(p)}
-        onRowsPerPageChange={(n) => {
-          setItemsPerPage(n);
-          fetchTierPricing(1, n);
-        }}
-        menuOptions={["Delete"]}
-        onOptionSelect={(action, row) => {
-          if (action === "Delete") handleDelete(row);
-        }}
-        title={
-          <Box display="flex" justifyContent="space-between" alignItems="center" gap={2}>
-            <TextField
-              variant="outlined"
-              placeholder="Search..."
-              size="small"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <CommonButton
-              label="Create Tier Pricing"
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={handleCreate}
-            />
-          </Box>
-        }
-        stickyColumnIds={["endpoint_name"]} // ✅ add this line
-      />
+      {/* Header */}
+      <Box display="flex" justifyContent="space-between" alignItems="center" gap={2} mb={2}>
+        <TextField
+          variant="outlined"
+          placeholder="Search..."
+          size="small"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
+          sx={{ flex: 1, maxWidth: 320 }}
+        />
+        <CommonButton
+          label="Create Tier Pricing"
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={handleCreate}
+        />
+      </Box>
+
+      {filteredRows.length > 0 ? (
+        <EnhancedTable
+          rows={filteredRows}
+          renderCell={(key, value) => FormatCellValue(value)}
+          headCells={headCells}
+          defaultSort="id"
+          defaultRows={10}
+          page={page}
+          count={count}
+          onPageChange={(p) => setPage(p)}
+          onRowsPerPageChange={(n) => {
+            setItemsPerPage(n);
+            fetchTierPricing(1, n);
+          }}
+          menuOptions={["Delete"]}
+          onOptionSelect={(action, row) => {
+            if (action === "Delete") handleDelete(row);
+          }}
+          stickyColumnIds={["endpoint_name"]}
+        />
+      ) : (
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 3 }}>
+          No tier pricing records found.
+        </Typography>
+      )}
 
       {isModalOpen && (
         <TierPricingModal

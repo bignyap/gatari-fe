@@ -10,9 +10,11 @@ import {
   useTheme,
   useMediaQuery,
   IconButton,
+  Paper,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import LayersIcon from '@mui/icons-material/Layers';
 import { useSearchParams } from 'react-router-dom';
 
 import { ListSubscriptionTiers } from '../../libraries/SubscriptionTier';
@@ -29,7 +31,7 @@ export function SubScriptionTierLoader() {
   const selectedTierId = searchParams.get('id');
 
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'), { noSsr: true });
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     fetchTiers();
@@ -61,33 +63,30 @@ export function SubScriptionTierLoader() {
         flexDirection: isMobile ? 'column' : 'row',
         width: '100vw',
         height: { xs: 'calc(100vh - 56px)', sm: 'calc(100vh - 64px)' },
-        m: 0,
-        p: 0,
       }}
     >
-      {/* LEFT PANE */}
-      <Box
+      {/* LEFT PANEL */}
+      <Paper
+        elevation={2}
         sx={{
           display: isMobile && selectedTierId ? 'none' : 'flex',
           width: 320,
           flexShrink: 0,
-          height: '100%',
           flexDirection: 'column',
-          backgroundColor: '#fafafa',
-          borderRight: isMobile ? 'none' : '1px solid #ddd',
-          borderBottom: isMobile ? '1px solid #ddd' : 'none',
+          height: '100%',
+          backgroundColor: '#fefefe',
         }}
       >
-        {/* Header */}
+        {/* Sticky Header */}
         <Box
           sx={{
             px: 2,
             pt: 2,
             pb: 1,
             position: 'sticky',
-            top: 0,
+            top: { xs: '56px', sm: '64px' },
             zIndex: 10,
-            bgcolor: '#fafafa',
+            bgcolor: '#fff',
           }}
         >
           <ListItemButton
@@ -109,29 +108,63 @@ export function SubScriptionTierLoader() {
           <Divider sx={{ mt: 2 }} />
         </Box>
 
-        {/* List */}
+        {/* Scrollable List */}
         <Box sx={{ flex: 1, overflowY: 'auto' }}>
           {loading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
               <CircularProgress />
             </Box>
           ) : (
-            <List>
-              {tiers.map((tier) => (
-                <ListItemButton
-                  key={tier.id}
-                  selected={String(tier.id) === selectedTierId}
-                  onClick={() => handleTierSelect(String(tier.id))}
-                >
-                  <ListItemText primary={tier.name} />
-                </ListItemButton>
-              ))}
+            <List dense sx={{ py: 1 }}>
+              {tiers.map((tier) => {
+                const isSelected = String(tier.id) === selectedTierId;
+                return (
+                  <ListItemButton
+                    key={tier.id}
+                    selected={isSelected}
+                    onClick={() => handleTierSelect(String(tier.id))}
+                    sx={{
+                      borderRadius: 1,
+                      mx: 1,
+                      my: 0.5,
+                      px: 2,
+                      py: 1,
+                      transition: '0.2s',
+                      color: isSelected ? '#fff' : 'inherit',
+                      backgroundColor: isSelected
+                          ? 'rgba(33, 48, 66, 0.75)'
+                          : 'transparent',
+                        '&:hover': {
+                          backgroundColor: isSelected
+                            ? 'rgba(33, 48, 66, 0.85)'
+                            : 'rgba(33, 48, 66, 0.05)',
+                        },
+                        '&.Mui-selected': {
+                          backgroundColor: 'rgba(33, 48, 66, 0.75)',
+                          color: '#fff',
+                        },
+                        '&.Mui-selected:hover': {
+                          backgroundColor: 'rgba(33, 48, 66, 0.85)',
+                        },
+                    }}
+                  >
+                    <LayersIcon
+                      fontSize="small"
+                      sx={{
+                        mr: 1,
+                        color: isSelected ? '#fff' : 'text.secondary',
+                      }}
+                    />
+                    <ListItemText primary={tier.name} />
+                  </ListItemButton>
+                );
+              })}
             </List>
           )}
         </Box>
-      </Box>
+      </Paper>
 
-      {/* RIGHT PANE */}
+      {/* RIGHT PANEL */}
       {(!isMobile || selectedTierId) && (
         <Box
           sx={{
@@ -152,7 +185,9 @@ export function SubScriptionTierLoader() {
             <TierPricingView tierId={Number(selectedTierId)} />
           ) : (
             !isMobile && (
-              <Typography variant="h6">Select a subscription tier to view pricing</Typography>
+              <Typography variant="h6" color="text.secondary">
+                Select a subscription tier to view pricing
+              </Typography>
             )
           )}
         </Box>
@@ -164,7 +199,7 @@ export function SubScriptionTierLoader() {
           onClose={() => setIsModalOpen(false)}
           onTierCreated={() => {
             setIsModalOpen(false);
-            fetchTiers(); // Refresh instead of reload
+            fetchTiers();
           }}
         />
       )}
