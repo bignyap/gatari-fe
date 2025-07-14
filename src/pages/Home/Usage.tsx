@@ -27,14 +27,13 @@ import {
   ListItemText,
 } from "@mui/material";
 import dayjs from "dayjs";
-import CommonButton from "../../components/Common/Button";
 
 // Format UNIX timestamp to "YYYY-MM-DD HH:mm"
 function formatLabelFromUnix(timestamp: number) {
   return dayjs.unix(timestamp).format("YYYY-MM-DD HH:mm");
 }
 
-export default function DailyUsage({ filters }: { filters: any }) {
+export default function DailyUsage() {
   const [data, setData] = useState<any[]>([]);
   const [orgs, setOrgs] = useState<string[]>([]);
   const [selectedOrgs, setSelectedOrgs] = useState<string[]>([]);
@@ -58,7 +57,6 @@ export default function DailyUsage({ filters }: { filters: any }) {
     }
 
     const updatedFilters = {
-      ...filters,
       start_date: start.toISOString(),
       end_date: end.toISOString(),
       bucket_size: parseInt(bucketSize, 10),

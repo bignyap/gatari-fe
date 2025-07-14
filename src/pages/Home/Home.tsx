@@ -1,44 +1,65 @@
-import { Box } from "@mui/material";
+import { Box, Grid, useTheme, useMediaQuery } from "@mui/material";
 import CountPage from "./Counts";
-import CreditsRemaining from './CreditsRemaining';
-import DailyUsage from './Usage';
+import CreditsRemaining from "./CreditsRemaining";
+import DailyUsage from "./Usage";
 
 export function HomePage() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   return (
     <Box
       sx={{
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        gridTemplateRows: "1fr 1fr",
         width: "100vw",
-        height: "100vh",
-        gap: 2,
-        padding: 2,
+        minHeight: "100vh",
         boxSizing: "border-box",
+        p: 2,
+        bgcolor: theme.palette.background.default,
       }}
     >
-      {/* Top Left */}
-      <Box sx={{ borderRadius: 3, p: 2, overflow: "hidden", bgcolor: "background.paper", boxShadow: 1 }}>
-        <CountPage />
-      </Box>
+      <Grid container spacing={2}>
+        <Grid item xs={12} md={6}>
+          <Box
+            sx={{
+              borderRadius: 3,
+              p: 2,
+              bgcolor: "background.paper",
+              boxShadow: 3,
+              height: isMobile ? "auto" : 300,
+            }}
+          >
+            <CountPage />
+          </Box>
+        </Grid>
 
-      {/* Top Right */}
-      <Box sx={{ borderRadius: 3, p: 2, bgcolor: "background.paper", boxShadow: 1 }}>
-        <CreditsRemaining />
-      </Box>
+        <Grid item xs={12} md={6}>
+          <Box
+            sx={{
+              borderRadius: 3,
+              p: 2,
+              bgcolor: "background.paper",
+              boxShadow: 3,
+              height: isMobile ? "auto" : 300,
+            }}
+          >
+            <CreditsRemaining />
+          </Box>
+        </Grid>
 
-      {/* Bottom Full Width */}
-      <Box
-        sx={{
-          gridColumn: "1 / span 2",
-          borderRadius: 3,
-          p: 2,
-          bgcolor: "background.paper",
-          boxShadow: 1,
-        }}
-      >
-        <DailyUsage />
-      </Box>
+        <Grid item xs={12}>
+          <Box
+            sx={{
+              borderRadius: 3,
+              p: 2,
+              bgcolor: "background.paper",
+              boxShadow: 3,
+              minHeight: 350,
+            }}
+          >
+            <DailyUsage />
+          </Box>
+        </Grid>
+      </Grid>
     </Box>
   );
 }
