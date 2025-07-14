@@ -10,9 +10,11 @@ import {
   useTheme,
   useMediaQuery,
   IconButton,
+  Paper,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CategoryIcon from '@mui/icons-material/Category'; // ✅ Resource icon
 import { useSearchParams } from 'react-router-dom';
 
 import { ListAllResourceTypes } from '../../libraries/ResourceType';
@@ -63,28 +65,27 @@ export function ResourcePage() {
       }}
     >
       {/* LEFT PANE */}
-      <Box
+      <Paper
+        elevation={2}
         sx={{
           display: isMobile && selectedResId ? 'none' : 'flex',
           width: 320,
           flexShrink: 0,
-          height: '100%',
           flexDirection: 'column',
-          backgroundColor: '#fafafa',
-          borderRight: isMobile ? 'none' : '1px solid #ddd',
-          borderBottom: isMobile ? '1px solid #ddd' : 'none',
+          height: '100%',
+          backgroundColor: '#fefefe',
         }}
       >
-        {/* Header */}
+        {/* Sticky Header */}
         <Box
           sx={{
             px: 2,
             pt: 2,
             pb: 1,
             position: 'sticky',
-            top: 0,
+            top: { xs: '56px', sm: '64px' },
             zIndex: 10,
-            bgcolor: '#fafafa',
+            bgcolor: '#fff',
           }}
         >
           <ListItemButton
@@ -113,20 +114,60 @@ export function ResourcePage() {
               <CircularProgress />
             </Box>
           ) : (
-            <List>
+            <List dense sx={{ py: 1 }}>
               {resourceTypes.map((res) => (
                 <ListItemButton
                   key={res.id}
                   selected={String(res.id) === selectedResId}
                   onClick={() => handleSelect(String(res.id))}
+                  sx={{
+                    borderRadius: 1,
+                    mx: 1,
+                    my: 0.5,
+                    px: 2,
+                    py: 1,
+                    transition: '0.2s',
+                    color: String(res.id) === selectedResId ? '#fff' : 'inherit',
+                    backgroundColor: String(res.id) === selectedResId
+                      ? 'rgba(33, 48, 66, 0.75)'
+                      : 'transparent',
+                    '&:hover': {
+                      backgroundColor: String(res.id) === selectedResId
+                        ? 'rgba(33, 48, 66, 0.85)'
+                        : 'rgba(33, 48, 66, 0.05)',
+                    },
+                    '&.Mui-selected': {
+                      backgroundColor: 'rgba(33, 48, 66, 0.75)',
+                      color: '#fff',
+                    },
+                    '&.Mui-selected:hover': {
+                      backgroundColor: 'rgba(33, 48, 66, 0.85)',
+                    },
+                  }}
                 >
-                  <ListItemText primary={res.name} />
+                  <CategoryIcon
+                    fontSize="small"
+                    sx={{
+                      mr: 1,
+                      color: String(res.id) === selectedResId ? '#fff' : 'text.secondary',
+                    }}
+                  />
+                  <ListItemText
+                    primary={res.name}
+                    primaryTypographyProps={{
+                      fontWeight: 500,
+                      fontSize: '0.9rem',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  />
                 </ListItemButton>
               ))}
             </List>
           )}
         </Box>
-      </Box>
+      </Paper>
 
       {/* RIGHT PANE */}
       {(!isMobile || selectedResId) && (
@@ -149,7 +190,7 @@ export function ResourcePage() {
             <ViewEndpoints key={selectedResId} resourceId={Number(selectedResId)} />
           ) : (
             !isMobile && (
-              <Typography variant="h6">
+              <Typography variant="h6" color="text.secondary">
                 Select a resource type to view endpoints
               </Typography>
             )

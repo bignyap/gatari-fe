@@ -21,11 +21,7 @@ interface ViewEndpointsProps {
 }
 
 export default function ViewEndpoints({ resourceId }: ViewEndpointsProps) {
-  return (
-    <Box>
-      <EndpointLoader resourceTypeId={resourceId} />
-    </Box>
-  );
+  return <EndpointLoader resourceTypeId={resourceId} />;
 }
 
 interface EndpointLoaderProps {
@@ -39,7 +35,7 @@ function EndpointLoader({ resourceTypeId }: EndpointLoaderProps) {
   const [snackbar, setSnackbar] = useState<{ message: string; status: string } | null>(null);
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
-  const [searchText, setSearchText] = useState<string>('');
+  const [search, setSearch] = useState('');
 
   const fetchEndpoints = async () => {
     setLoading(true);
@@ -47,9 +43,8 @@ function EndpointLoader({ resourceTypeId }: EndpointLoaderProps) {
       const data = await ListEndpointsByResourceType(resourceTypeId);
       setEndpoints(data || []);
     } catch (error) {
-      console.error('Error fetching endpoints:', error);
       setSnackbar({
-        message: 'Failed to load endpoints. Please try again later.',
+        message: 'Failed to load endpoints.',
         status: 'error',
       });
     } finally {
@@ -79,9 +74,16 @@ function EndpointLoader({ resourceTypeId }: EndpointLoaderProps) {
   };
 
   const filteredEndpoints = endpoints.filter((ep) =>
-    ep.name.toLowerCase().includes(searchText.toLowerCase()) ||
-    ep.pathTemplate.toLowerCase().includes(searchText.toLowerCase())
+    ep.name.toLowerCase().includes(search.toLowerCase()) ||
+    ep.pathTemplate.toLowerCase().includes(search.toLowerCase())
   );
+
+  const headCells: HeadCell[] = [
+    { id: 'name', label: 'Name' },
+    { id: 'description', label: 'Description' },
+    { id: 'httpMethod', label: 'HTTP Method' },
+    { id: 'pathTemplate', label: 'Path Template' },
+  ];
 
   return (
     <Box>
@@ -94,12 +96,38 @@ function EndpointLoader({ resourceTypeId }: EndpointLoaderProps) {
         />
       )}
 
+      {/* Header */}
+      <Box display="flex" justifyContent="space-between" alignItems="center" gap={2} mb={2}>
+        <TextField
+          variant="outlined"
+          placeholder="Search endpoints..."
+          size="small"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
+          sx={{ flex: 1, maxWidth: 320 }}
+        />
+        <CommonButton
+          label="Create Endpoint"
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={handleCreateEndpoint}
+        />
+      </Box>
+
       {loading ? (
         <Box display="flex" justifyContent="center" alignItems="center" height="300px">
           <CircularProgress />
         </Box>
-      ) : (
+      ) : filteredEndpoints.length > 0 ? (
         <EnhancedTable
+          stickyColumnIds={[]}
           rows={filteredEndpoints.slice(
             page * rowsPerPage,
             page * rowsPerPage + rowsPerPage
@@ -107,44 +135,6 @@ function EndpointLoader({ resourceTypeId }: EndpointLoaderProps) {
           headCells={headCells}
           defaultSort="id"
           defaultRows={rowsPerPage}
-          stickyColumnIds={[]}
-          tableContainerSx={{
-            maxHeight: '55vh',
-            overflowX: 'auto',
-            overflowY: 'auto',
-          }}
-          title={
-            <Box
-              sx={{
-                display: 'flex',
-                gap: 2,
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-            >
-              <TextField
-                variant="outlined"
-                placeholder="Search endpoints..."
-                size="small"
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                sx={{ width: '400px' }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              <CommonButton
-                label="CREATE ENDPOINT"
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={handleCreateEndpoint}
-              />
-            </Box>
-          }
           page={page}
           count={filteredEndpoints.length}
           onPageChange={setPage}
@@ -153,6 +143,10 @@ function EndpointLoader({ resourceTypeId }: EndpointLoaderProps) {
             setPage(0);
           }}
         />
+      ) : (
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 3 }}>
+          No endpoints found.
+        </Typography>
       )}
 
       {isModalOpen && (
@@ -165,11 +159,3 @@ function EndpointLoader({ resourceTypeId }: EndpointLoaderProps) {
     </Box>
   );
 }
-
-const headCells: HeadCell[] = [
-  { id: 'name', label: 'Name' },
-  { id: 'description', label: 'Description' },
-  { id: 'httpMethod', label: 'HTTP Method' },
-  { id: 'pathTemplate', label: 'Path Template' },
-  // { id: 'resourceTypeName', label: 'Resource Type' },
-];
