@@ -1,12 +1,18 @@
 import {
-  Box, Typography, Accordion, AccordionSummary, AccordionDetails
+  Box,
+  Typography,
+  Tabs,
+  Tab,
+  Card,
+  CardContent,
+  CircularProgress,
 } from '@mui/material';
-import { ExpandMore, Edit, Cancel, Save } from '@mui/icons-material';
-import { useEffect, useState, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { Edit, Cancel, Save } from '@mui/icons-material';
+import { useEffect, useRef, useState } from 'react';
+
 import {
   GetOrganizationById,
-  UpdateOrganization
+  UpdateOrganization,
 } from '../../libraries/Organization';
 import { CustomizedSnackbars } from '../../components/Common/Toast';
 import { SubscriptionLoader } from '../Subscription/Subscription';
@@ -31,26 +37,33 @@ interface OrganizationRow {
 }
 
 export function ViewOrganizationPage({ orgId }: { orgId: number }) {
-  const navigate = useNavigate();
   return (
     <Box>
-      <ViewOrganizationLoader navigate={navigate} orgId={orgId} />
+      <ViewOrganizationLoader orgId={orgId} />
     </Box>
   );
 }
 
-function ViewOrganizationLoader({ navigate, orgId }: { navigate: (path: string) => void, orgId: number }) {
-  const { id } = useParams<{ id: string }>();
+function SectionWrapper({ children }: { title: string; children: React.ReactNode }) {
+  return (
+    <Card variant="outlined" sx={{ mb: 3, borderRadius: 2, boxShadow: 1 }}>
+      <CardContent>{children}</CardContent>
+    </Card>
+  );
+}
+
+function ViewOrganizationLoader({ orgId }: { orgId: number }) {
   const [organization, setOrganization] = useState<OrganizationRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [snackbar, setSnackbar] = useState<{ message: string; status: string } | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editedConfig, setEditedConfig] = useState<string | null>(null);
+  const [tabIndex, setTabIndex] = useState(0);
   const formRef = useRef<HTMLFormElement | null>(null);
 
   useEffect(() => {
     if (orgId) fetchOrganization(orgId);
-  }, [orgId]);  
+  }, [orgId]);
 
   async function fetchOrganization(id: number) {
     try {
@@ -90,6 +103,16 @@ function ViewOrganizationLoader({ navigate, orgId }: { navigate: (path: string) 
     }
   };
 
+  const handleSave = () => {
+    if (formRef.current) {
+      const formData = new FormData(formRef.current);
+      const plain: any = Object.fromEntries(formData.entries());
+      handleSubmit(plain);
+    }
+  };
+
+  if (loading) return <CircularProgress sx={{ mt: 4 }} />;
+
   return (
     <>
       {snackbar && (
@@ -101,34 +124,30 @@ function ViewOrganizationLoader({ navigate, orgId }: { navigate: (path: string) 
         />
       )}
 
-      <Box
-        sx={{
-          width: '100%',
-          maxWidth: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 2,
-          boxSizing: 'border-box',
-        }}
-      >
-        <Accordion sx={{ width: '100%' }} defaultExpanded>
-          <AccordionSummary expandIcon={<ExpandMore />}>
-            <Typography fontWeight={600}>Info</Typography>
-          </AccordionSummary>
-          <AccordionDetails>
+      <Box>
+        
+        <Tabs
+          value={tabIndex}
+          onChange={( e, newVal) => setTabIndex(newVal)}
+          variant="scrollable"
+          allowScrollButtonsMobile
+          sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}
+        >
+          <Tab label="Configuration" />
+          <Tab label="Subscription" />
+          <Tab label="Permission" />
+          <Tab label="Usage" />
+        </Tabs>
+
+        {tabIndex === 0 && (
+          <SectionWrapper title="Organization Info & Config">
             <Box display="flex" justifyContent="flex-end" mb={2} gap={1}>
               {isEditMode && (
                 <CommonButton
                   label="Save"
                   variant="contained"
                   startIcon={<Save />}
-                  onClick={() => {
-                    if (formRef.current) {
-                      const formData = new FormData(formRef.current);
-                      const plain: any = Object.fromEntries(formData.entries());
-                      handleSubmit(plain);
-                    }
-                  }}
+                  onClick={handleSave}
                 />
               )}
               <CommonButton
@@ -144,107 +163,74 @@ function ViewOrganizationLoader({ navigate, orgId }: { navigate: (path: string) 
               />
             </Box>
 
-            {organization && (
-              <form
-                id="org-form"
-                ref={formRef}
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const formData = new FormData(e.currentTarget);
-                  const plain: any = Object.fromEntries(formData.entries());
-                  handleSubmit(plain);
-                }}
-              >
-                <OrganizationForm
-                  initialData={organization}
-                  onSubmit={handleSubmit}
-                  onCancel={() => setIsEditMode(false)}
-                  columns={3}
-                  buttonAtTop={false}
-                  includeConfig={false}
-                  disabled={!isEditMode}
-                />
-              </form>
-            )}
-          </AccordionDetails>
-        </Accordion>
+            <form
+              id="org-form"
+              ref={formRef}
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                const plain: any = Object.fromEntries(formData.entries());
+                handleSubmit(plain);
+              }}
+            >
+              <OrganizationForm
+                initialData={organization}
+                onSubmit={handleSubmit}
+                onCancel={() => setIsEditMode(false)}
+                columns={3}
+                buttonAtTop={true}
+                includeConfig={false}
+                disabled={!isEditMode}
+              />
+            </form>
 
-        <Accordion sx={{ width: '100%' }}>
-          <AccordionSummary expandIcon={<ExpandMore />}>
-            <Typography fontWeight={600}>Configuration</Typography>
-          </AccordionSummary>
-          <AccordionDetails>
             {organization && (
               <ConfigEditor
                 config={editedConfig ?? organization.config}
                 onConfigChange={(newConfig) => setEditedConfig(newConfig)}
-                onSave={() => {
-                  if (formRef.current) {
-                    const formData = new FormData(formRef.current);
-                    const plain: any = Object.fromEntries(formData.entries());
-                    handleSubmit(plain);
-                  }
-                }}
                 editorMode={isEditMode}
                 alwaysEditMode={false}
-                cardSx={{
-                  border: 'none',
-                  boxShadow: 'none'
-                }}
+                disabled={!isEditMode}
+                cardSx={{ border: 'none', boxShadow: 'none' }}
               />
             )}
-          </AccordionDetails>
-        </Accordion>
+          </SectionWrapper>
+        )}
 
-        <Accordion sx={{ width: '100%' }}>
-          <AccordionSummary expandIcon={<ExpandMore />}>
-            <Typography fontWeight={600}>Subscription</Typography>
-          </AccordionSummary>
-          <AccordionDetails
-              sx={{
-                width: '100%',
-                overflowX: 'auto',
-                px: 2,
-                pt: 1,
-                pb: 2,
-              }}
-            >
-              {organization && (
-                <Box sx={{ width: '100%', overflowX: 'auto' }}>
-                  <SubscriptionLoader
-                    orgId={orgId}
-                    subInitName={organization.name}
-                    tableContainerSx={{
-                      width: '100%',
-                      maxHeight: '50vh',
-                      overflowX: 'auto',
-                      overflowY: 'auto',
-                    }}
-                  />
-                </Box>
-              )}
-            </AccordionDetails>
-        </Accordion>
+        {tabIndex === 1 && (
+          <SectionWrapper title="Subscriptions">
+            {organization && (
+              <Box sx={{ width: '100%', overflowX: 'auto' }}>
+                <SubscriptionLoader
+                  orgId={orgId}
+                  subInitName={organization.name}
+                  tableContainerSx={{
+                    width: '100%',
+                    maxHeight: '50vh',
+                    overflowX: 'auto',
+                    overflowY: 'auto',
+                  }}
+                />
+              </Box>
+            )}
+          </SectionWrapper>
+        )}
 
-        <Accordion sx={{ width: '100%' }}>
-          <AccordionSummary expandIcon={<ExpandMore />}>
-            <Typography fontWeight={600}>Permission</Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            {organization && <PermissionsPage organizationId={Number(organization.id)} />}
-          </AccordionDetails>
-        </Accordion>
+        {tabIndex === 2 && (
+          <SectionWrapper title="Permissions">
+            {organization && (
+              <PermissionsPage organizationId={Number(organization.id)} />
+            )}
+          </SectionWrapper>
+        )}
 
-        <Accordion sx={{ width: '100%' }}>
-          <AccordionSummary expandIcon={<ExpandMore />}>
-            <Typography fontWeight={600}>Usage</Typography>
-          </AccordionSummary>
-          <AccordionDetails>
+        {tabIndex === 3 && (
+          <SectionWrapper title="Usage">
             <Typography variant="body1" pl={1}>
               Usage data will be displayed here.
             </Typography>
-          </AccordionDetails>
-        </Accordion>
+          </SectionWrapper>
+        )}
 
       </Box>
     </>
