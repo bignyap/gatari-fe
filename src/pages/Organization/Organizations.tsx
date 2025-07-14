@@ -10,9 +10,13 @@ import {
   useTheme,
   useMediaQuery,
   IconButton,
+  Paper,
+  Chip,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ApartmentIcon from '@mui/icons-material/Apartment';
+import FolderIcon from '@mui/icons-material/Folder';
 import { ListOrganizations } from '../../libraries/Organization';
 import OrganizationModal from './OrganizationModal';
 import OrgTypeModal from '../OrganizationType/OrgTypeModal';
@@ -30,7 +34,7 @@ export function OrganizationPage() {
   const selectedOrgId = searchParams.get("id");
 
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'), { noSsr: true });
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     async function fetchOrganizations() {
@@ -68,114 +72,152 @@ export function OrganizationPage() {
         flexDirection: isMobile ? 'column' : 'row',
         width: '100vw',
         height: { xs: 'calc(100vh - 56px)', sm: 'calc(100vh - 64px)' },
-        m: 0,
-        p: 0,
       }}
     >
-      {/* LEFT PANE */}
-      <Box
+      {/* LEFT PANEL */}
+      <Paper
+        elevation={2}
         sx={{
           display: isMobile && selectedOrgId ? 'none' : 'flex',
           width: 320,
           flexShrink: 0,
-          height: '100%',
-          borderRight: isMobile ? 'none' : '1px solid #ddd',
-          borderBottom: isMobile ? '1px solid #ddd' : 'none',
           flexDirection: 'column',
-          backgroundColor: '#fafafa',
-          transition: 'all 0.3s ease',
+          height: '100%',
+          backgroundColor: '#fefefe',
         }}
       >
-          {/* Sticky Header */}
-          <Box
-            sx={{
-              px: 2,
-              pt: 2,
-              pb: 1,
-              position: 'sticky',
-              top: { xs: '56px', sm: '64px' },
-              zIndex: 10,
-              bgcolor: '#fafafa',
-            }}
-          >
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <ListItemButton
-                onClick={() => setIsModalOpen(true)}
-                sx={{
-                  borderRadius: 1,
-                  px: 2,
-                  py: 1,
-                  bgcolor: 'grey.100',
-                  '&:hover': { bgcolor: 'grey.200' },
-                }}
-              >
-                <AddIcon fontSize="small" sx={{ mr: 1 }} />
-                <ListItemText
-                  primary="Create Organization"
-                  primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 500 }}
-                />
-              </ListItemButton>
+        {/* Sticky Action Header */}
+        <Box
+          sx={{
+            px: 2,
+            pt: 2,
+            pb: 1,
+            position: 'sticky',
+            top: { xs: '56px', sm: '64px' },
+            zIndex: 10,
+            bgcolor: '#fff',
+          }}
+        >
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <ListItemButton
+              onClick={() => setIsModalOpen(true)}
+              sx={{
+                borderRadius: 1,
+                px: 2,
+                py: 1,
+                bgcolor: 'grey.100',
+                '&:hover': { bgcolor: 'grey.200' },
+              }}
+            >
+              <AddIcon fontSize="small" sx={{ mr: 1 }} />
+              <ListItemText
+                primary="Create Organization"
+                primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 500 }}
+              />
+            </ListItemButton>
 
-              <ListItemButton
-                onClick={() => setIsTypeModalOpen(true)}
-                sx={{
-                  borderRadius: 1,
-                  px: 2,
-                  py: 1,
-                  bgcolor: 'grey.100',
-                  '&:hover': { bgcolor: 'grey.200' },
-                }}
-              >
-                <AddIcon fontSize="small" sx={{ mr: 1 }} />
-                <ListItemText
-                  primary="Create Org Type"
-                  primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 500 }}
-                />
-              </ListItemButton>
-            </Box>
-
-            <Divider sx={{ mt: 2 }} />
+            <ListItemButton
+              onClick={() => setIsTypeModalOpen(true)}
+              sx={{
+                borderRadius: 1,
+                px: 2,
+                py: 1,
+                bgcolor: 'grey.100',
+                '&:hover': { bgcolor: 'grey.200' },
+              }}
+            >
+              <AddIcon fontSize="small" sx={{ mr: 1 }} />
+              <ListItemText
+                primary="Create Org Type"
+                primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 500 }}
+              />
+            </ListItemButton>
           </Box>
+          <Divider sx={{ mt: 2 }} />
+        </Box>
 
-          {/* Scrollable List */}
-          <Box sx={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
-            {loading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-                <CircularProgress />
-              </Box>
-            ) : (
-              <List sx={{ py: 0 }}>
-                {Object.entries(groupedOrgs).map(([type, orgs]) => (
-                  <Box key={type} sx={{ px: 1 }}>
-                    <Typography
-                      variant="caption"
+        {/* Organization List */}
+        <Box sx={{ flex: 1, overflowY: 'auto' }}>
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <List dense sx={{ py: 1 }}>
+              {Object.entries(groupedOrgs).map(([type, orgs]) => (
+                <Box key={type} sx={{ px: 1 }}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      textTransform: 'uppercase',
+                      fontWeight: 600,
+                      color: 'text.secondary',
+                      px: 1,
+                      pt: 1,
+                      pb: 0.5,
+                    }}
+                  >
+                    <FolderIcon fontSize="inherit" sx={{ mr: 0.5, verticalAlign: 'middle' }} />
+                    {type}
+                  </Typography>
+                  {orgs.map((org) => (
+                  <ListItemButton
+                      key={org.id}
+                      selected={String(org.id) === selectedOrgId}
+                      onClick={() => handleOrgSelect(String(org.id))}
                       sx={{
-                        textTransform: 'uppercase',
-                        fontWeight: 600,
-                        color: 'text.secondary',
-                        px: 1,
-                        pt: 1,
+                        borderRadius: 1,
+                        mx: 1,
+                        my: 0.5,
+                        px: 2,
+                        py: 1,
+                        transition: '0.2s',
+                        color: String(org.id) === selectedOrgId ? '#fff' : 'inherit',
+                        backgroundColor: String(org.id) === selectedOrgId
+                          ? 'rgba(33, 48, 66, 0.75)'
+                          : 'transparent',
+                        '&:hover': {
+                          backgroundColor: String(org.id) === selectedOrgId
+                            ? 'rgba(33, 48, 66, 0.85)'
+                            : 'rgba(33, 48, 66, 0.05)',
+                        },
+                        '&.Mui-selected': {
+                          backgroundColor: 'rgba(33, 48, 66, 0.75)',
+                          color: '#fff',
+                        },
+                        '&.Mui-selected:hover': {
+                          backgroundColor: 'rgba(33, 48, 66, 0.85)',
+                        },
                       }}
                     >
-                      {type}
-                    </Typography>
-                    {orgs.map((org) => (
-                      <ListItemButton
-                        key={org.id}
-                        selected={String(org.id) === selectedOrgId}
-                        onClick={() => handleOrgSelect(String(org.id))}
-                      >
-                        <ListItemText primary={org.name} />
-                      </ListItemButton>
-                    ))}
-                  </Box>
-                ))}
-              </List>
-            )}
-          </Box>
-      </Box>
+                      <ApartmentIcon
+                        fontSize="small"
+                        sx={{
+                          mr: 1,
+                          color: String(org.id) === selectedOrgId ? '#fff' : 'text.secondary',
+                        }}
+                      />
+                      <ListItemText
+                        primary={org.name}
+                        primaryTypographyProps={{
+                          fontWeight: 500,
+                          fontSize: '0.9rem',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      />
+                    </ListItemButton>
+                  
+                  ))}
+                </Box>
+              ))}
+            </List>
+          )}
+        </Box>
+      </Paper>
 
-      {/* RIGHT PANE */}
+      {/* RIGHT PANEL */}
       {(!isMobile || selectedOrgId) && (
         <Box
           sx={{
@@ -183,10 +225,9 @@ export function OrganizationPage() {
             height: '100%',
             overflowY: 'auto',
             backgroundColor: '#f5f5f5',
-            p: isMobile ? 2 : 2,
+            p: 2,
           }}
         >
-      
           {isMobile && selectedOrgId && (
             <IconButton onClick={() => setSearchParams({})} sx={{ mb: 2 }}>
               <ArrowBackIcon />
@@ -197,7 +238,9 @@ export function OrganizationPage() {
             <ViewOrganizationPage key={selectedOrgId} orgId={Number(selectedOrgId)} />
           ) : (
             !isMobile && (
-              <Typography variant="h6">Select an organization to view details</Typography>
+              <Typography variant="h6" color="text.secondary">
+                Select an organization to view details
+              </Typography>
             )
           )}
         </Box>
@@ -217,7 +260,6 @@ export function OrganizationPage() {
         />
       )}
 
-      {/* Toast */}
       {snackbar && (
         <CustomizedSnackbars
           message={snackbar.message}

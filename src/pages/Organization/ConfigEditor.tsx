@@ -49,13 +49,13 @@ const ConfigEditor: React.FC<ConfigEditorProps> = ({
       }}
     >
       <CardContent>
-        <Box
+      <Box
           sx={{
             width: '100%',
             minHeight: editorHeight,
-            border: `1px solid ${theme.palette.divider}`,
-            borderRadius: 2,
-            backgroundColor: '#fefefe',
+            border: '1px solid rgba(33, 48, 66, 0.1)',
+            borderRadius: 1,
+            backgroundColor: '#f1f4f7', // soft bluish-gray
             overflow: 'hidden',
           }}
         >

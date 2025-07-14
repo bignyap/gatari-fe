@@ -46,7 +46,16 @@ export function ViewOrganizationPage({ orgId }: { orgId: number }) {
 
 function SectionWrapper({ children }: { title: string; children: React.ReactNode }) {
   return (
-    <Card variant="outlined" sx={{ mb: 3, borderRadius: 2, boxShadow: 1 }}>
+    <Card
+      variant="outlined"
+      sx={{
+        borderRadius: 2,
+        boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+        borderColor: 'rgba(33,48,66,0.2)',
+        backgroundColor: '#fff',
+        mb: 3,
+      }}
+    >
       <CardContent>{children}</CardContent>
     </Card>
   );
@@ -125,7 +134,7 @@ function ViewOrganizationLoader({ orgId }: { orgId: number }) {
       )}
 
       <Box>
-        
+
         <Tabs
           value={tabIndex}
           onChange={( e, newVal) => setTabIndex(newVal)}
