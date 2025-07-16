@@ -8,6 +8,7 @@ import CommonButton from '../../components/Common/Button';
 import { GridComponentInEdit } from '../Organization/OrganizationForm';
 import { ListAllResourceTypes } from '../../libraries/ResourceType';
 import { CustomizedSnackbars } from '../../components/Common/Toast';
+import { ListAllPermissionTypes } from '../../libraries/PermissionType';
 
 interface EndpointFormProps {
   initialData: EndpointData;
@@ -22,6 +23,7 @@ interface EndpointData {
   pathTemplate: string;
   resourceTypeId: number | string;
   resourceTypeName: string;
+  permissionCode?: string;
 }
 
 const EndpointForm: React.FC<EndpointFormProps> = ({ initialData, onSubmit, onCancel }) => {
@@ -29,15 +31,20 @@ const EndpointForm: React.FC<EndpointFormProps> = ({ initialData, onSubmit, onCa
   const [resourceTypes, setResourceTypes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [snackbar, setSnackbar] = useState<{ message: string; status: string } | null>(null);
+  const [permissionTypes, setPermissionTypes] = useState<any[]>([]);
 
   useEffect(() => {
-    ListAllResourceTypes()
-      .then((result) => setResourceTypes(result || []))
+    Promise.all([ListAllResourceTypes(), ListAllPermissionTypes()])
+      .then(([resTypes, permTypes]) => {
+        setResourceTypes(resTypes || []);
+        setPermissionTypes(permTypes || []);
+      })
       .catch(() =>
-        setSnackbar({ message: 'Failed to load resource types', status: 'error' })
+        setSnackbar({ message: 'Failed to load dropdown data', status: 'error' })
       )
       .finally(() => setLoading(false));
   }, []);
+  
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -55,6 +62,12 @@ const EndpointForm: React.FC<EndpointFormProps> = ({ initialData, onSubmit, onCa
         resourceTypeId: Number(value),
         resourceTypeName: selected?.name || '',
       }));
+    } else if (name === 'permissionCode') {
+        const selected = permissionTypes.find((perm) => perm.code === value);
+        setFormData((prev) => ({
+          ...prev,
+          permissionCode: value,
+        }));
     } else {
       setFormData((prev) => ({
         ...prev,
@@ -153,6 +166,25 @@ const EndpointForm: React.FC<EndpointFormProps> = ({ initialData, onSubmit, onCa
               </Select>
             </FormControl>
           } size={gridSize} />
+
+          <GridComponentInEdit value={
+            <FormControl fullWidth>
+              <InputLabel>Permission Type</InputLabel>
+              <Select
+                name="permissionCode"
+                value={formData.permissionCode || ''}
+                onChange={handleSelectChange}
+                label="Permission Type"
+              >
+                {permissionTypes.map((perm) => (
+                  <MenuItem key={perm.code} value={perm.code}>
+                    {perm.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          } size={gridSize} />
+
         </Grid>
       )}
 

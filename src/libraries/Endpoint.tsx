@@ -69,6 +69,7 @@ function createEndpointData(endpoint: any): EndpointData {
       pathTemplate: endpoint.path_template,
       resourceTypeId: endpoint.resource_type_id,
       resourceTypeName: endpoint.resource_type_name,
+      permissionCode: endpoint.permission_code,
     };
 }
 
@@ -80,5 +81,6 @@ interface EndpointData {
     pathTemplate: string;
     resourceTypeId: number;
     resourceTypeName: string;
+    permissionCode: string;
     [key: string]: any;
 }

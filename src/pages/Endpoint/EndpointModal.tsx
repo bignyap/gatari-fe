@@ -23,6 +23,7 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
     pathTemplate: '',
     resourceTypeId: resourceTypeId,
     resourceTypeName: resourceTypeName ?? '',
+    permissionCode: 'RED',
   };
 
   const handleSubmit = async (data: any) => {
@@ -33,6 +34,7 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
         http_method: data.httpMethod,
         path_template: data.pathTemplate,
         resource_type_id: resourceTypeId,
+        permission_code: data.premissionCode
       };
 
       const newEndpoint = await CreateEndpoint(payload);

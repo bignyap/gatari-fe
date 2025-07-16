@@ -69,6 +69,7 @@ function EndpointLoader({ resourceTypeId }: EndpointLoaderProps) {
         pathTemplate: newEndpoint.path_template,
         resourceTypeId: newEndpoint.resource_type_id,
         resourceTypeName: newEndpoint.resource_type_name,
+        permissionCode: newEndpoint.permission_code,
       },
     ]);
   };
@@ -83,6 +84,7 @@ function EndpointLoader({ resourceTypeId }: EndpointLoaderProps) {
     { id: 'description', label: 'Description' },
     { id: 'httpMethod', label: 'HTTP Method' },
     { id: 'pathTemplate', label: 'Path Template' },
+    { id: 'permissionCode', label: 'Permission' },
   ];
 
   return (
