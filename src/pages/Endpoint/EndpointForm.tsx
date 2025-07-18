@@ -63,7 +63,6 @@ const EndpointForm: React.FC<EndpointFormProps> = ({ initialData, onSubmit, onCa
         resourceTypeName: selected?.name || '',
       }));
     } else if (name === 'permissionCode') {
-        const selected = permissionTypes.find((perm) => perm.code === value);
         setFormData((prev) => ({
           ...prev,
           permissionCode: value,
@@ -78,6 +77,7 @@ const EndpointForm: React.FC<EndpointFormProps> = ({ initialData, onSubmit, onCa
 
   const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    console.log(formData)
     onSubmit(formData);
   };
 
@@ -174,7 +174,7 @@ const EndpointForm: React.FC<EndpointFormProps> = ({ initialData, onSubmit, onCa
                 name="permissionCode"
                 value={formData.permissionCode || ''}
                 onChange={handleSelectChange}
-                label="Permission Type"
+                label="Permission"
               >
                 {permissionTypes.map((perm) => (
                   <MenuItem key={perm.code} value={perm.code}>

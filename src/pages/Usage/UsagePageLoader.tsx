@@ -1,14 +1,14 @@
 import {
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
   Box,
   Typography,
   CircularProgress,
   Tooltip,
   IconButton,
+  useTheme,
+  Divider,
+  Grid,
+  Paper,
 } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import { saveAs } from "file-saver";
 import { EnhancedTable } from "../../components/Table/Table";
@@ -32,7 +32,6 @@ export function UsagePageLoader({
     itemsPerPage: 100,
   });
 
-  // Group data by groupBy key
   const groupedData: Record<string, any[]> = {};
   for (const item of data) {
     const key = item[groupBy] || "Ungrouped";
@@ -41,6 +40,7 @@ export function UsagePageLoader({
   }
 
   const [snackbar, setSnackbar] = useState<{ message: string; status: string } | null>(null);
+  const theme = useTheme();
 
   const exportToCSV = (rows: any[], fileName: string) => {
     const csvHeaders = usageHeadCells.map(h => `"${h.label}"`).join(",");
@@ -50,6 +50,12 @@ export function UsagePageLoader({
     const csvContent = [csvHeaders, ...csvRows].join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     saveAs(blob, `${fileName}.csv`);
+  };
+
+  const calculateGroupTotals = (rows: any[]) => {
+    const totalCalls = rows.reduce((sum, r) => sum + (r.total_calls || 0), 0);
+    const totalCost = rows.reduce((sum, r) => sum + (r.total_cost || 0), 0);
+    return { totalCalls, totalCost };
   };
 
   return (
@@ -76,51 +82,86 @@ export function UsagePageLoader({
           No usage data found.
         </Typography>
       ) : (
-        Object.entries(groupedData).map(([group, rows]) => (
-          <Accordion
-            key={group}
-            // defaultExpanded
-            sx={{
-              width: "100%",
-              marginBottom: 2,
-              borderRadius: "12px",
-              background: "rgba(255, 255, 255, 0.85)",
-              boxShadow: 2,
-            }}
-          >
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography fontWeight="bold">{group}</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <Box display="flex" justifyContent="flex-end" mb={1}>
-                <Tooltip title="Export CSV">
-                  <IconButton onClick={() => exportToCSV(rows, group.replace(/\s+/g, "_"))}>
-                    <FileDownloadIcon />
-                  </IconButton>
-                </Tooltip>
-              </Box>
-              <EnhancedTable
-                rows={rows}
-                headCells={usageHeadCells}
-                renderCell={(key, value) => FormatCellValue(value)}
-                defaultSort="endpoint_name"
-                count={rows.length}
-                page={0}
-                defaultRows={rows.length}
-                onPageChange={() => {}}
-                onRowsPerPageChange={() => {}}
-                stickyColumnIds={["endpoint_name"]}
-              />
-            </AccordionDetails>
-          </Accordion>
-        ))
+        <Grid container spacing={2} sx={{ mt: 1 }}>
+          {Object.entries(groupedData).map(([group, rows]) => {
+            const { totalCalls, totalCost } = calculateGroupTotals(rows);
+
+            return (
+              <Grid key={group} item xs={12} sm={12} md={6} lg={6}>
+                <Paper
+                  elevation={3}
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    bgcolor: "background.paper",
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  {/* Header section with title and export */}
+                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                    <Typography variant="subtitle1" fontWeight={600}>
+                      {group}
+                    </Typography>
+                    <Tooltip title="Export CSV">
+                      <IconButton
+                        size="small"
+                        onClick={() => exportToCSV(rows, group.replace(/\s+/g, "_"))}
+                      >
+                        <FileDownloadIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+
+                  {/* Totals section */}
+                  <Box
+                    mt={0.5}
+                    display="flex"
+                    gap={4}
+                    flexWrap="wrap"
+                    alignItems="center"
+                    justifyContent="center"
+                    textAlign="center"
+                  >
+                    <Typography variant="body2" color="text.secondary">
+                      <strong>Total Calls:</strong> {totalCalls}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      <strong>Total Cost:</strong> ${totalCost.toFixed(2)}
+                    </Typography>
+                  </Box>
+
+                  <Divider sx={{ my: 1 }} />
+
+                  {/* Scrollable table section */}
+                  <Box sx={{ overflowY: "auto", maxHeight: 300 }}>
+                    <EnhancedTable
+                      rows={rows}
+                      headCells={usageHeadCells}
+                      renderCell={(key, value) => FormatCellValue(value)}
+                      defaultSort=""
+                      count={rows.length}
+                      page={0}
+                      defaultRows={5}
+                      onPageChange={() => {}}
+                      onRowsPerPageChange={() => {}}
+                      stickyColumnIds={[]}
+                      showPaginationControls={false}
+                    />
+                  </Box>
+                </Paper>
+              </Grid>
+            );
+          })}
+        </Grid>
       )}
     </Box>
   );
 }
 
+
 const usageHeadCells: HeadCell[] = [
-  { id: "subscription_name", label: "Subscription" },
   { id: "endpoint_name", label: "Endpoint" },
   { id: "total_calls", label: "Total Calls" },
   { id: "total_cost", label: "Total Cost" },
@@ -152,7 +193,6 @@ export function UseApiUsageData(
         if (options?.page) queryParams.page_number = options.page;
         if (options?.itemsPerPage) queryParams.items_per_page = options.itemsPerPage;
 
-        // Convert date fields to unix
         Object.entries(queryParams).forEach(([key, val]) => {
           if (key === "start_date" || key === "end_date") {
             queryParams[key] = dayjs(val).unix();
@@ -168,7 +208,6 @@ export function UseApiUsageData(
       }
     };
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(filters), options?.groupBy, options?.page, options?.itemsPerPage]);
 
   return { data, loading, error };
