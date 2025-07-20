@@ -23,12 +23,20 @@ interface Endpoint {
 }
 
 const TierPricingModal: React.FC<TierPricingFormProps> = ({ onClose, onTierPricingCreated, tierId }) => {
-    const [formData, setFormData] = useState({
-        base_cost_per_call : 1,
-        base_rate_limit: 100,
-        api_endpoint_id: 0
-    });
+    type CostMode = "fixed" | "dynamic";
 
+    const [formData, setFormData] = useState<{
+      base_cost_per_call: number;
+      base_rate_limit: number;
+      api_endpoint_id: number;
+      cost_mode: CostMode;
+    }>({
+      base_cost_per_call: 1,
+      base_rate_limit: 100,
+      api_endpoint_id: 0,
+      cost_mode: "fixed",
+    });
+  
     const [endpoints, setEndpoints] = useState<Endpoint[]>([]);
     const [snackbar, setSnackbar] = useState<{ message: string; status: string } | null>(null);
 
@@ -67,24 +75,26 @@ const TierPricingModal: React.FC<TierPricingFormProps> = ({ onClose, onTierPrici
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-          const newSub = await CreateTierPricing(
-            {...formData, subscription_tier_id: tierId}
-        );
-          console.log("tier pricing created", newSub);
-          onTierPricingCreated(newSub);
-          onClose();
-          <CustomizedSnackbars
-              message={`Tier pricing created successfully!`}
-              status="success"
-              onClose={() => {}}
-              open={true}
-          />
-        } catch (error) {
-        console.error('Error creating subscription:', error);
-        }
-    };
+      e.preventDefault();
+      try {
+        const newSub = await CreateTierPricing({
+          ...formData,
+          subscription_tier_id: tierId,
+        });
+        onTierPricingCreated(newSub);
+        onClose();
+        setSnackbar({
+          message: `Tier pricing created successfully!`,
+          status: "success",
+        });
+      } catch (error) {
+        console.error("Error creating tier pricing:", error);
+        setSnackbar({
+          message: "Failed to create tier pricing.",
+          status: "error",
+        });
+      }
+    };    
 
   return (
     <>
@@ -149,6 +159,23 @@ const TierPricingModal: React.FC<TierPricingFormProps> = ({ onClose, onTierPrici
                   onChange={handleChange}
                   required
               />
+              <FormControl fullWidth margin="normal">
+                <InputLabel id="cost-mode-label">Cost Mode</InputLabel>
+                <Select
+                  labelId="cost-mode-label"
+                  name="cost_mode"
+                  value={formData.cost_mode}
+                  onChange={(e) =>
+                    setFormData({ ...formData, cost_mode: e.target.value as CostMode })
+                  }
+                  label="Cost Mode"
+                  fullWidth
+                  required
+                >
+                  <MenuItem value="fixed">Fixed</MenuItem>
+                  <MenuItem value="dynamic">Dynamic</MenuItem>
+                </Select>
+              </FormControl>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
               <CommonButton
                   label='Create' 

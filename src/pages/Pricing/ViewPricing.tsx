@@ -59,6 +59,7 @@ export default function TierPricingView({ tierId }: { tierId: number }) {
     { id: "endpoint_name", label: "Endpoint", width: 20 },
     { id: "base_cost_per_call", label: "Base Cost / Call" },
     { id: "base_rate_limit", label: "Rate Limit / Sec" },
+    { id: "cost_mode", label: "Cost Mode" },
   ];
 
   const filteredRows = tierPricing.filter((row) =>

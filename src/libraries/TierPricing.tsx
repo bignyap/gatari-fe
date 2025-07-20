@@ -41,14 +41,15 @@ export async function CreateTierPricingInBulk(data: Array<Record<string, any>>):
   return PostData(url, data, { 'Content-Type': 'application/json' }, false);
 }
 
-function createTierPricingData(org: any): TierPricingData {
+function createTierPricingData(tierPricing: any): TierPricingData {
     return {
-      id: org.id,
-      base_cost_per_call: org.base_cost_per_call,
-      base_rate_limit: org.base_rate_limit,
-      endpoint_name: org.endpoint_name,
-      api_endpoint_id: org.api_endpoint_id,
-      subscription_tier_id: org.subscription_tier_id,
+      id: tierPricing.id,
+      base_cost_per_call: tierPricing.base_cost_per_call,
+      base_rate_limit: tierPricing.base_rate_limit,
+      endpoint_name: tierPricing.endpoint_name,
+      api_endpoint_id: tierPricing.api_endpoint_id,
+      subscription_tier_id: tierPricing.subscription_tier_id,
+      cost_mode: tierPricing.cost_mode,
     };
 }
 
@@ -59,5 +60,6 @@ interface TierPricingData {
     endpoint_name: string;
     api_endpoint_id: number
     subscription_tier_id: number;
+    cost_mode: string;
     [key: string]: any;
 }
