@@ -34,7 +34,7 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
         http_method: data.httpMethod,
         path_template: data.pathTemplate,
         resource_type_id: resourceTypeId,
-        permission_code: data.premissionCode
+        permission_code: data.permissionCode
       };
 
       const newEndpoint = await CreateEndpoint(payload);
@@ -49,6 +49,8 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
     } catch (error) {
       console.error('Error creating endpoint:', error);
       // Optionally add error toast handling here
+    } finally {
+      onClose();
     }
   };
 

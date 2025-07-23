@@ -77,7 +77,6 @@ const EndpointForm: React.FC<EndpointFormProps> = ({ initialData, onSubmit, onCa
 
   const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    console.log(formData)
     onSubmit(formData);
   };
 
