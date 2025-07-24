@@ -10,23 +10,23 @@ export interface ModalField {
   required?: boolean;
 }
 
-interface SettingsModalProps {
+interface SettingsModalProps<TFormData extends Record<string, unknown>> {
   title: string;
   fields: ModalField[];
   onClose: () => void;
-  onSubmit: (formData: Record<string, any>) => Promise<any>;
-  onSuccess: (result: any) => void;
+  onSubmit: (formData: TFormData) => Promise<unknown>;
+  onSuccess: (result: unknown) => void;
 }
 
-const SettingsModal: React.FC<SettingsModalProps> = ({
+const SettingsModal = <TFormData extends Record<string, unknown>>({
   title,
   fields,
   onClose,
   onSubmit,
   onSuccess,
-}) => {
+}: SettingsModalProps<TFormData>) => {
   const renderFields = (
-    formData: Record<string, any>,
+    formData: TFormData,
     handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   ) => (
     <>
@@ -37,7 +37,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
           margin="normal"
           name={name}
           label={label}
-          value={formData[name] || ''}
+          value={formData[name as keyof TFormData] as string || ''}
           onChange={handleChange}
           required={required}
           type={type}
@@ -48,7 +48,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   );
 
   return (
-    <GenericModal
+    <GenericModal<TFormData>
       title={title}
       renderFields={renderFields}
       onClose={onClose}

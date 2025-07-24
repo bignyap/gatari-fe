@@ -36,7 +36,7 @@ const StyledTab = styled(Tab)(({ theme }) => ({
 }));
 
 // Styled Tabs container
-const StyledTabs = styled(Tabs)(({ theme }) => ({
+const StyledTabs = styled(Tabs)(({ }) => ({
   minHeight: 36,
   '& .MuiTabs-indicator': {
     backgroundColor: TEAL,

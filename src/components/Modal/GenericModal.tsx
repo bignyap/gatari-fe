@@ -6,34 +6,33 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
-  Divider,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import CommonButton from '../Common/Button';
 
-interface GenericModalProps {
+interface GenericModalProps<TFormData extends Record<string, unknown>> {
   title: string;
   renderFields: (
-    formData: Record<string, any>,
-    handleChange: (e: React.ChangeEvent<any>) => void
+    formData: TFormData,
+    handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void
   ) => React.ReactNode;
   onClose: () => void;
-  onSubmit: (formData: Record<string, any>) => Promise<any>;
-  onSuccess: (result: any) => void;
+  onSubmit: (formData: TFormData) => Promise<unknown>;
+  onSuccess: (result: unknown) => void;
 }
 
-const GenericModal: React.FC<GenericModalProps> = ({
+const GenericModal = <TFormData extends Record<string, unknown>>({
   title,
   renderFields,
   onClose,
   onSubmit,
   onSuccess,
-}) => {
-  const [formData, setFormData] = useState<Record<string, any>>({});
+}: GenericModalProps<TFormData>) => {
+  const [formData, setFormData] = useState<TFormData>({} as TFormData);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const handleChange = (e: React.ChangeEvent<any>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };

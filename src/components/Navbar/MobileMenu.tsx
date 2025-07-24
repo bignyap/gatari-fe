@@ -1,18 +1,43 @@
+import React from 'react';
 import {
-  IconButton, Menu, MenuItem, Accordion, AccordionSummary, AccordionDetails, Typography
+  IconButton,
+  Menu,
+  MenuItem,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Typography,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useNavigate } from 'react-router-dom';
+
+interface PageChild {
+  name: string;
+  link: string;
+}
+
+interface PageItem {
+  name: string;
+  link?: string;
+  children?: PageChild[];
+}
+
+interface MobileMenuProps {
+  anchorElNav: HTMLElement | null;
+  handleOpenNavMenu: (event: React.MouseEvent<HTMLElement>) => void;
+  handleCloseNavMenu: () => void;
+  pages: PageItem[];
+  onMenuItemClick: (name: string) => void;
+}
 
 export default function MobileMenu({
   anchorElNav,
   handleOpenNavMenu,
   handleCloseNavMenu,
   pages,
-  selectedPage,
-  onMenuItemClick
-}: any) {
+  onMenuItemClick,
+}: MobileMenuProps) {
   const navigate = useNavigate();
 
   return (
@@ -28,14 +53,14 @@ export default function MobileMenu({
         open={Boolean(anchorElNav)}
         onClose={handleCloseNavMenu}
       >
-        {pages.map((page: any) =>
+        {pages.map((page) =>
           page.children ? (
             <Accordion key={page.name} sx={{ boxShadow: 'none' }}>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography>{page.name}</Typography>
               </AccordionSummary>
               <AccordionDetails sx={{ pl: 2 }}>
-                {page.children.map((child: any) => (
+                {page.children.map((child) => (
                   <MenuItem
                     key={child.name}
                     onClick={() => {
@@ -54,7 +79,7 @@ export default function MobileMenu({
               key={page.name}
               onClick={() => {
                 onMenuItemClick(page.name);
-                navigate(page.link);
+                if (page.link) navigate(page.link);
                 handleCloseNavMenu();
               }}
             >
