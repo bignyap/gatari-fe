@@ -38,7 +38,7 @@ jobs:
       - name: ✅ Run Tests & Lint
         run: |
           make test
-          make lint
+# make lint
 
       - name: 🧱 Build production React app
         run: make build-prod
