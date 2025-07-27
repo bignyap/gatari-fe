@@ -8,11 +8,11 @@ BUILD       := $(PKG_MANAGER) run build
 TEST        := $(PKG_MANAGER) test --watchAll=false
 LINT        := $(PKG_MANAGER) run lint
 FORMAT      := $(PKG_MANAGER) run format
-CLEAN_CMD   := rm -rf node_modules dist build
+CLEAN_CMD   := rm -rf node_modules dist build || true
 
 # Docker config
-IMAGE_NAME      := my-react-app
-CONTAINER_NAME  := my-react-app-container
+IMAGE_NAME      := gatari-fe
+CONTAINER_NAME  := gatari-fe-container
 PORT            := 3000
 
 # Main targets
@@ -41,9 +41,10 @@ format:
 	$(FORMAT)
 
 clean:
+	echo "Cleaning node_modules and build artifacts..."
 	$(CLEAN_CMD)
 
-# Docker targets
+# Docker targets (for local use)
 build-container:
 	docker build -t $(IMAGE_NAME) .
 
@@ -51,14 +52,14 @@ start-container:
 	docker run --rm -d -p $(PORT):80 --name $(CONTAINER_NAME) $(IMAGE_NAME)
 
 stop-container:
-	docker stop $(CONTAINER_NAME) || true
+	docker stop $(CONTAINER_NAME)
 
 docker-rebuild: clean build build-container
 
-# Optional scan with Trivy
+# Optional security scan with Trivy
 scan:
 	trivy image $(IMAGE_NAME)
 
-# Build with custom env (e.g. for CI/CD)
+# Custom prod build for CI/CD
 build-prod:
 	REACT_APP_ENV=production $(BUILD)
