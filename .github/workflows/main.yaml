@@ -2,13 +2,13 @@ name: 🐳 Build & Push Frontend Docker Image
 
 on:
   push:
-    # branches: [main]
     tags:
       - 'v*'
   workflow_dispatch:
 
 env:
   IMAGE_NAME: gatari-fe
+  PLATFORMS: linux/amd64,linux/arm64
 
 jobs:
   build-and-push:
@@ -23,22 +23,8 @@ jobs:
         with:
           node-version: 22.15.0
 
-      - name: 📦 Install dependencies
-        run: make install
-
-      - name: ✅ Test & Lint
-        run: |
-          make test
-# make lint
-
-      - name: 🧱 Build production React app
-        run: make build-prod
-
-      - name: 🐳 Build Docker image
-        run: |
-          GIT_TAG=${GITHUB_REF##*/}  # Extract tag like v1.0.0
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:$GIT_TAG .
-          docker tag ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:$GIT_TAG ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+      - name: 🏗️ Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: 🔐 Login to Docker Hub
         uses: docker/login-action@v3
@@ -46,8 +32,19 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: 📤 Push Docker images
+      - name: 📦 Install dependencies
+        run: make install
+
+      - name: ✅ Run Tests & Lint
         run: |
-          GIT_TAG=${GITHUB_REF##*/}
-          docker push ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:$GIT_TAG
-          docker push ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+          make test
+          make lint
+
+      - name: 🧱 Build production React app
+        run: make build-prod
+
+      - name: 🐳 Build and Push multi-platform Docker image
+        env:
+          DOCKER_NAMESPACE: ${{ secrets.DOCKER_USERNAME }}
+        run: |
+          make docker-push
