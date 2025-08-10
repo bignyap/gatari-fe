@@ -24,6 +24,7 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
     resourceTypeId: resourceTypeId,
     resourceTypeName: resourceTypeName ?? '',
     permissionCode: 'RED',
+    accessType: 'Free',
   };
 
   const handleSubmit = async (data: any) => {
@@ -34,7 +35,10 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
         http_method: data.httpMethod,
         path_template: data.pathTemplate,
         resource_type_id: resourceTypeId,
-        permission_code: data.permissionCode
+        permission_code: data.permissionCode,
+        access_type: data.accessType
+          ? data.accessType.trim().toLowerCase()
+          : "paid"
       };
 
       const newEndpoint = await CreateEndpoint(payload);

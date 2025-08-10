@@ -70,6 +70,7 @@ function createEndpointData(endpoint: any): EndpointData {
       resourceTypeId: endpoint.resource_type_id,
       resourceTypeName: endpoint.resource_type_name,
       permissionCode: endpoint.permission_code,
+      accessType: endpoint.access_type
     };
 }
 
@@ -82,5 +83,6 @@ interface EndpointData {
     resourceTypeId: number;
     resourceTypeName: string;
     permissionCode: string;
+    accessType: string;
     [key: string]: any;
 }

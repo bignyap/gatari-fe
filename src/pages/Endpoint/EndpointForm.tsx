@@ -24,6 +24,7 @@ interface EndpointData {
   resourceTypeId: number | string;
   resourceTypeName: string;
   permissionCode?: string;
+  accessType: string;
 }
 
 const EndpointForm: React.FC<EndpointFormProps> = ({ initialData, onSubmit, onCancel }) => {
@@ -179,6 +180,22 @@ const EndpointForm: React.FC<EndpointFormProps> = ({ initialData, onSubmit, onCa
                   <MenuItem key={perm.code} value={perm.code}>
                     {perm.name}
                   </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          } size={gridSize} />
+
+          <GridComponentInEdit value={
+            <FormControl fullWidth>
+              <InputLabel>HTTP Method</InputLabel>
+              <Select
+                name="httpMethod"
+                value={formData.accessType}
+                onChange={handleSelectChange}
+                label="HTTP Method"
+              >
+                {['Paid', 'Free', 'Private'].map((method) => (
+                  <MenuItem key={method} value={method}>{method}</MenuItem>
                 ))}
               </Select>
             </FormControl>
