@@ -17,6 +17,7 @@ import { UsagePage } from './pages/Usage/Usage';
 // import { EndpointTab } from './pages/Settings/Endpoint/Endpoint';
 import { ResourcePage } from './pages/Resource/Resource';
 import { PermissionTypeTab } from './pages/Permission/Permission';
+import ChatWidget from "./components/ChatWidget/ChatWidget";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -46,5 +47,10 @@ const router = createBrowserRouter(
 );
 
 export default function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <RouterProvider router={router} />
+      <ChatWidget />
+    </>
+  );
 }
